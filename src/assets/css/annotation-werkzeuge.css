@@ -1,0 +1,159 @@
+/* Zirkel, Geodreieck und Einrast-Schalter der Annotationen (Erweiterung Medienzentrum MTK) */
+
+#annotation #zirkel {
+	position: absolute;
+	top: 0;
+	left: 0;
+	pointer-events: none;
+	overflow: visible;
+	touch-action: none;
+}
+
+#annotation #zirkel .zirkel-griff {
+	pointer-events: auto;
+	cursor: grab;
+	touch-action: none;
+}
+
+#annotation #geodreieck {
+	position: absolute;
+	top: 0;
+	left: 0;
+	pointer-events: none;
+	overflow: visible;
+	touch-action: none;
+}
+
+#annotation #geodreieck .geo-forme {
+	fill: rgba(222, 236, 252, 0.55);
+	stroke: #2e63ae;
+	stroke-width: 2;
+	stroke-linejoin: round;
+	pointer-events: none;
+}
+
+#annotation #geodreieck .geo-corps {
+	fill: transparent;
+	stroke: none;
+	pointer-events: auto;
+	cursor: move;
+	touch-action: none;
+}
+
+#annotation #geodreieck .geo-traits,
+#annotation #geodreieck .geo-arc {
+	stroke: #1f3f6e;
+	stroke-width: 1.2;
+	fill: none;
+	pointer-events: none;
+}
+
+#annotation #geodreieck .geo-paralleles {
+	stroke: #2e63ae;
+	stroke-opacity: 0.45;
+	stroke-width: 1;
+	fill: none;
+	pointer-events: none;
+}
+
+#annotation #geodreieck .geo-paralleles.demi {
+	stroke-opacity: 0.35;
+	stroke-dasharray: 5 4;
+}
+
+#annotation #geodreieck .geo-axe {
+	stroke: #2e63ae;
+	stroke-width: 1.2;
+	stroke-dasharray: 5 4;
+	fill: none;
+	pointer-events: none;
+}
+
+#annotation #geodreieck text {
+	fill: #1f3f6e;
+	pointer-events: none;
+	user-select: none;
+}
+
+#annotation #geodreieck text.geo-cm {
+	font-weight: 500;
+}
+
+#annotation #geodreieck text.geo-par {
+	fill: #7a8db3;
+	font-weight: 600;
+}
+
+#annotation #geodreieck text.geo-grad {
+	font-weight: 700;
+}
+
+#annotation #geodreieck text.geo-grad-int {
+	fill: #c8102e;
+	font-weight: 500;
+}
+
+#annotation #geodreieck text.geo-winkel {
+	font-weight: 800;
+}
+
+#annotation #geodreieck .geo-griff {
+	pointer-events: auto;
+	cursor: grab;
+	touch-action: none;
+}
+
+#annotation #geodreieck .zirkel-fang {
+	fill: none;
+	stroke: #e30613;
+	stroke-width: 2.5;
+}
+
+#annotation #zirkel .zirkel-fang {
+	fill: none;
+	stroke: #e30613;
+	stroke-width: 2.5;
+}
+
+#options .option.zirkel-schalter {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	width: auto;
+	padding: 0 4px;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 600;
+	color: #333;
+	white-space: nowrap;
+}
+
+#options .option.zirkel-schalter .schiene {
+	position: relative;
+	display: inline-block;
+	width: 32px;
+	height: 18px;
+	border-radius: 9px;
+	background: #bbb;
+	transition: background 0.15s;
+}
+
+#options .option.zirkel-schalter .knopf {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+	transition: left 0.15s;
+}
+
+#options .option.zirkel-schalter.actif .schiene {
+	background: #01ced1;
+}
+
+#options .option.zirkel-schalter.actif .knopf {
+	left: 16px;
+}

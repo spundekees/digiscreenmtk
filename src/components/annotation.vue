@@ -16,6 +16,7 @@
 							<v-text :config="item.text" />
 						</v-label>
 						<v-line :config="item" v-else-if="item.objet === 'dessin'" @dragstart="selectionnerObjet" @dragend="deplacerFin" />
+						<v-path :config="item" v-else-if="item.objet === 'remplissage'" @dragstart="selectionnerObjet" @dragend="deplacerFin" @transformend="redimensionnerFin" />
 					</template>
 					<v-rect :config="configSelection" @dragend="deplacerFin" @transformend="redimensionnerFin" />
 					<v-rect :config="configCreationRectangle" @dragend="deplacerFin" @transformend="redimensionnerFin" />
@@ -29,6 +30,65 @@
 				</v-layer>
 				<v-layer ref="calqueStylo" :config="configCalqueStylo" />
 			</v-stage>
+			<svg id="geodreieck" v-if="geoVisible" :width="dimensionsCanva.w" :height="dimensionsCanva.h">
+				<g :transform="'translate(' + geo.x + ' ' + geo.y + ') rotate(' + geoDegres + ')'">
+					<polygon class="geo-forme" :points="geoTrianglePoints" />
+					<path :d="geoDessin.paralleles" class="geo-paralleles" />
+					<path :d="geoDessin.demiParalleles" class="geo-paralleles demi" />
+					<path :d="geoDessin.axe" class="geo-axe" />
+					<path :d="geoDessin.arcs" class="geo-arc" />
+					<path :d="geoDessin.traits" class="geo-traits" />
+					<text v-for="(t, i) in geoDessin.textes" :key="'gt' + i" :x="t.x" :y="t.y" :font-size="t.taille" :class="t.classe" text-anchor="middle" dominant-baseline="central">{{ t.texte }}</text>
+					<text class="geo-winkel" x="0" :y="geoDessin.yAngle" :font-size="geoDessin.tailleAngle" text-anchor="middle" dominant-baseline="central">{{ geoTexteAngle }}</text>
+					<polygon class="geo-corps" :points="geoCorpsPoints" @pointerdown="geoGesteDebut($event, 'deplacer')">
+						<title>{{ $t('geoVerschieben') }}</title>
+					</polygon>
+					<g class="geo-griff" data-geo="echelle" :transform="'translate(0 ' + (-geoL / 2 + geoDessin.u * 0.75) + ')'" @pointerdown="geoGesteDebut($event, 'echelle')">
+						<title>{{ $t('geoSkalieren') }}</title>
+						<circle r="17" fill="#fff" stroke="#2e63ae" stroke-width="1.5" />
+						<path d="M-6 6L6-6M-6 6v-5M-6 6h5M6-6v5M6-6h-5" stroke="#2e63ae" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+					</g>
+					<g class="geo-griff" v-for="cote in [-1, 1]" :key="'rot' + cote" :data-geo="'tourner' + cote" :transform="'translate(' + (cote * (geoL / 2 + 26)) + ' -14)'" @pointerdown="geoGesteDebut($event, 'tourner')">
+						<title>{{ $t('geoDrehen') }}</title>
+						<circle r="17" fill="#fff" stroke="#2e63ae" stroke-width="1.5" />
+						<path d="M-7 3a7.5 7.5 0 1 0 1.5-8.5M-5.5-5.5l.4-4.6M-5.5-5.5l4.4.9" stroke="#2e63ae" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+					</g>
+				</g>
+				<circle v-if="geoSnap" class="zirkel-fang" :cx="geoSnap.x" :cy="geoSnap.y" r="11" />
+				<g v-if="geoLongueur" :transform="'translate(' + geoLongueur.x + ' ' + geoLongueur.y + ')'">
+					<rect x="-34" y="-13" width="68" height="24" rx="6" fill="#1f3f6e" />
+					<text x="0" y="0" fill="#fff" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central">{{ geoLongueur.texte }}</text>
+				</g>
+			</svg>
+			<svg id="zirkel" v-if="outilZirkel" :width="dimensionsCanva.w" :height="dimensionsCanva.h">
+				<circle v-if="zirkelSnap" class="zirkel-fang" :cx="zirkelSnap.x" :cy="zirkelSnap.y" r="11" />
+				<circle :cx="zirkel.x" :cy="zirkel.y" :r="zirkel.r" fill="none" stroke="#2e63ae" stroke-width="1" stroke-dasharray="4 5" opacity="0.45" />
+				<line :x1="zirkel.x + Math.cos(zirkel.a) * Math.min(24, zirkel.r)" :y1="zirkel.y + Math.sin(zirkel.a) * Math.min(24, zirkel.r)" :x2="zirkelSpitze.x" :y2="zirkelSpitze.y" stroke="#2e63ae" stroke-width="3" stroke-linecap="round" opacity="0.85" />
+				<g class="zirkel-griff" data-zirkel="deplacer" :transform="'translate(' + zirkel.x + ' ' + zirkel.y + ')'" @pointerdown="zirkelGesteDebut($event, 'deplacer')">
+					<title>{{ $t('zirkelMittelpunkt') }}</title>
+					<circle r="24" fill="rgba(46,99,174,.06)" stroke="#2e63ae" stroke-width="1.2" stroke-opacity=".7" />
+					<path d="M0-21V-5M0 5V21M-21 0H-5M5 0H21" stroke="#2e63ae" stroke-width="1" stroke-opacity=".75" fill="none" />
+					<path d="M0-21l-3.5 4M0-21l3.5 4M0 21l-3.5-4M0 21l3.5-4M-21 0l4-3.5M-21 0l4 3.5M21 0l-4-3.5M21 0l-4 3.5" stroke="#2e63ae" stroke-width="1.4" stroke-opacity=".8" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+					<circle r="2.2" fill="#c8102e" />
+				</g>
+				<g class="zirkel-griff" data-zirkel="rayon" :transform="'translate(' + (zirkel.x + Math.cos(zirkel.a) * zirkel.r * 0.5) + ' ' + (zirkel.y + Math.sin(zirkel.a) * zirkel.r * 0.5) + ') rotate(' + (zirkel.a * 180 / Math.PI) + ')'" @pointerdown="zirkelGesteDebut($event, 'rayon')">
+					<title>{{ $t('zirkelRadius') }}</title>
+					<rect x="-13" y="-9" width="26" height="18" rx="5" fill="#fff" stroke="#2e63ae" stroke-width="1.5" />
+					<path d="M-7 0h14M-7 0l3-3M-7 0l3 3M7 0l-3-3M7 0l-3 3" stroke="#2e63ae" stroke-width="1.4" fill="none" stroke-linecap="round" />
+				</g>
+				<g class="zirkel-griff" data-zirkel="dessiner" :transform="'translate(' + zirkelSpitze.x + ' ' + zirkelSpitze.y + ')'" @pointerdown="zirkelGesteDebut($event, 'dessiner')">
+					<title>{{ $t('zirkelZeichnen') }}</title>
+					<circle r="17" :fill="couleurStylo === '#ffffff' || couleurStylo === '#ffff00' || couleurStylo === '#00ff00' || couleurStylo === '#04fdff' ? '#2e63ae' : couleurStylo" stroke="#fff" stroke-width="2" />
+					<circle r="6" cx="9" cy="-9" :fill="couleurStylo" stroke="#fff" stroke-width="1.5" />
+					<path d="M-6 6l1.5-4.5 6.5-6.5 3 3-6.5 6.5z" fill="#fff" />
+				</g>
+				<g class="zirkel-griff" data-zirkel="saisir" :transform="'translate(' + zirkel.x + ' ' + (zirkel.y - 38) + ')'" @pointerdown.stop.prevent @click="zirkelSaisirRayon">
+					<title>{{ $t('zirkelRadiusEingeben') }}</title>
+					<rect x="-66" y="-13" width="132" height="22" rx="6" fill="#fff" stroke="#2e63ae" stroke-width="1" />
+					<text x="-8" y="3" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1f3f6e">r = {{ zirkelTexteRayon }}</text>
+					<path d="M53 -4l4 4M50 3l1-3 6-6 3 3-6 6z" fill="none" stroke="#2e63ae" stroke-width="1.1" stroke-linejoin="round" />
+				</g>
+			</svg>
 		</div>
 
 		<div id="outils-annotation" key="outils">
@@ -44,6 +104,15 @@
 			</button>
 			<button type="button" class="outil" :title="$t('dessiner')" :aria-label="$t('dessiner')" :aria-pressed="(outilDessiner) ? 'true' : 'false'" :class="{'actif': outilDessiner}" @click="definirOutilPrincipal('dessiner')">
 				<img src="@/assets/img/stylo.png" :alt="$t('dessiner')">
+			</button>
+			<button type="button" id="outil-zirkel" class="outil" :title="$t('zirkel')" :aria-label="$t('zirkel')" :aria-pressed="outilZirkel ? 'true' : 'false'" :class="{'actif': outilZirkel}" @click="definirOutilPrincipal('zirkel')">
+				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="1.6" /><path d="M11 5.5L5.5 20M13 5.5l5.5 14.5M7.6 14.5h8.8" /></g></svg>
+			</button>
+			<button type="button" id="outil-geodreieck" class="outil" :title="$t('geodreieck')" :aria-label="$t('geodreieck')" :aria-pressed="geoVisible ? 'true' : 'false'" :class="{'actif': geoVisible}" @click="basculerGeodreieck">
+				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g fill="none" stroke="#000" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M2 7h20L12 17z" /><path d="M5 7v2M8 7v1.5M12 7v2.5M16 7v1.5M19 7v2M9.5 11.5a3.5 3.5 0 0 1 5 0" /></g></svg>
+			</button>
+			<button type="button" id="outil-remplir" class="outil" :title="$t('remplir')" :aria-label="$t('remplir')" :aria-pressed="outilRemplir ? 'true' : 'false'" :class="{'actif': outilRemplir}" @click="definirOutilPrincipal('remplir')">
+				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M16.56 8.94L7.62 0 6.21 1.41l2.38 2.38-5.15 5.15c-.59.59-.59 1.54 0 2.12l5.5 5.5c.29.29.68.44 1.06.44s.77-.15 1.06-.44l5.5-5.5c.59-.58.59-1.53 0-2.12zM5.21 10L10 5.21 14.79 10H5.21zM19 11.5s-2 2.17-2 3.5c0 1.1.9 2 2 2s2-.9 2-2c0-1.33-2-3.5-2-3.5z" /><rect x="2" y="19.5" width="20" height="3.5" rx="1" fill="#f7d000" /></svg>
 			</button>
 			<button type="button" class="outil" :title="$t('deplacerPanneaux')" :aria-label="$t('deplacerPanneaux')" :aria-pressed="(outilDeplacer) ? 'true' : 'false'" :class="{'actif': outilDeplacer}" @click="definirOutilPrincipal('deplacer')">
 				<img src="@/assets/img/pan.png" :alt="$t('deplacerPanneaux')">
@@ -89,6 +158,16 @@
 		</div>
 
 		<div id="options" v-if="nom !== '' || (!outilSelectionner && !outilDeplacer)" key="options">
+			<button type="button" class="option zirkel-schalter" role="switch" :aria-checked="zirkelFang ? 'true' : 'false'" :title="zirkelFang ? $t('zirkelEinrastenAn') : $t('zirkelEinrastenAus')" :class="{'actif': zirkelFang}" @click="basculerZirkelFang" v-if="outilZirkel">
+				<span class="schiene"><span class="knopf" /></span>
+				<span class="beschriftung">{{ $t('zirkelEinrasten') }}</span>
+			</button>
+			<span class="separateur" v-if="outilZirkel" />
+			<button type="button" class="option zirkel-schalter geo-schalter" role="switch" :aria-checked="geoFang ? 'true' : 'false'" :title="geoFang ? $t('geoEinrastenAn') : $t('geoEinrastenAus')" :class="{'actif': geoFang}" @click="basculerGeoFang" v-if="geoVisible">
+				<span class="schiene"><span class="knopf" /></span>
+				<span class="beschriftung">{{ $t('geoEinrasten') }}</span>
+			</button>
+			<span class="separateur" v-if="geoVisible" />
 			<button type="button" class="option icone" :title="$t('verrouiller')" :aria-label="$t('verrouiller')" @click="verrouiller" v-if="outilSelectionner && !objetVerrouille">
 				<span><i class="material-icons" aria-hidden="true">lock</i></span>
 			</button>
@@ -102,60 +181,60 @@
 				<span><i class="material-icons" aria-hidden="true">flip_to_back</i></span>
 			</button>
 			<span class="separateur" v-if="outilSelectionner" />
-			<button type="button" class="option noir" :title="$t('noir')" :aria-label="$t('noir')" :aria-pressed="(outilDessiner && couleurStylo === '#000000') ? 'true' : 'false'" :class="{'actif': outilDessiner && couleurStylo === '#000000'}" @click="modifierCouleur('#000000')" v-if="nom !== 'selection' && objet !== 'label'">
+			<button type="button" class="option noir" :title="$t('noir')" :aria-label="$t('noir')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#000000') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#000000'}" @click="modifierCouleur('#000000')" v-if="nom !== 'selection' && objet !== 'label'">
 				<span class="couleur noir" />
 			</button>
-			<button type="button" class="option blanc" :title="$t('blanc')" :aria-label="$t('blanc')" :aria-pressed="(outilDessiner && couleurStylo === '#ffffff') ? 'true' : 'false'" :class="{'actif': outilDessiner && couleurStylo === '#ffffff'}" @click="modifierCouleur('#ffffff')" v-if="nom !== 'selection' && objet !== 'label'">
+			<button type="button" class="option blanc" :title="$t('blanc')" :aria-label="$t('blanc')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffffff') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffffff'}" @click="modifierCouleur('#ffffff')" v-if="nom !== 'selection' && objet !== 'label'">
 				<span class="couleur blanc" />
 			</button>
-			<button type="button" class="option rouge" :title="$t('rouge')" :aria-label="$t('rouge')" :aria-pressed="(outilDessiner && couleurStylo === '#ff0000') ? 'true' : 'false'" :class="{'actif': outilDessiner && couleurStylo === '#ff0000'}" @click="modifierCouleur('#ff0000')" v-if="nom !== 'selection'">
+			<button type="button" class="option rouge" :title="$t('rouge')" :aria-label="$t('rouge')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ff0000') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ff0000'}" @click="modifierCouleur('#ff0000')" v-if="nom !== 'selection'">
 				<span class="couleur rouge" />
 			</button>
-			<button type="button" class="option jaune" :title="$t('jaune')" :aria-label="$t('jaune')" :aria-pressed="(outilDessiner && couleurStylo === '#ffff00') ? 'true' : 'false'" :class="{'actif': outilDessiner && couleurStylo === '#ffff00'}" @click="modifierCouleur('#ffff00')" v-if="nom !== 'selection'">
+			<button type="button" class="option jaune" :title="$t('jaune')" :aria-label="$t('jaune')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffff00') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffff00'}" @click="modifierCouleur('#ffff00')" v-if="nom !== 'selection'">
 				<span class="couleur jaune" />
 			</button>
-			<button type="button" class="option vert" :title="$t('vert')" :aria-label="$t('vert')" :aria-pressed="(outilDessiner && couleurStylo === '#00ff00') ? 'true' : 'false'" :class="{'actif': outilDessiner && couleurStylo === '#00ff00'}" @click="modifierCouleur('#00ff00')" v-if="nom !== 'selection'">
+			<button type="button" class="option vert" :title="$t('vert')" :aria-label="$t('vert')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#00ff00') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#00ff00'}" @click="modifierCouleur('#00ff00')" v-if="nom !== 'selection'">
 				<span class="couleur vert" />
 			</button>
-			<button type="button" class="option bleu" :title="$t('bleu')" :aria-label="$t('bleu')" :aria-pressed="(outilDessiner && couleurStylo === '#04fdff') ? 'true' : 'false'" :class="{'actif': outilDessiner && couleurStylo === '#04fdff'}" @click="modifierCouleur('#04fdff')" v-if="nom !== 'selection'">
+			<button type="button" class="option bleu" :title="$t('bleu')" :aria-label="$t('bleu')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#04fdff') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#04fdff'}" @click="modifierCouleur('#04fdff')" v-if="nom !== 'selection'">
 				<span class="couleur bleu" />
 			</button>
 			<span class="option icone" v-if="nom !== 'selection'" @click="definirCouleur">
 				<label for="couleur-annotation" :title="$t('selectionnerCouleur')"><i class="material-icons" aria-hidden="true">colorize</i></label>
 				<input id="couleur-annotation" type="color" tabindex="0" :aria-label="$t('selectionnerCouleur')" :value="couleurSelecteur">
 			</span>
-			<span class="separateur" v-if="outilDessiner" />
-			<span class="option label-epaisseur" v-if="outilDessiner">
+			<span class="separateur" v-if="outilDessiner || outilZirkel || outilRemplir" />
+			<span class="option label-epaisseur" v-if="outilDessiner || outilZirkel">
 				<span><i class="material-icons" aria-hidden="true">line_weight</i></span>
 			</span>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 2 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 2 })" :aria-pressed="(epaisseurStylo === 2) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 2}" @click="modifierEpaisseur(2)" v-if="outilDessiner">
+			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 2 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 2 })" :aria-pressed="(epaisseurStylo === 2) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 2}" @click="modifierEpaisseur(2)" v-if="outilDessiner || outilZirkel">
 				<span>2</span>
 			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 5 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 5 })" :aria-pressed="(epaisseurStylo === 5) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 5}" @click="modifierEpaisseur(5)" v-if="outilDessiner">
+			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 5 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 5 })" :aria-pressed="(epaisseurStylo === 5) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 5}" @click="modifierEpaisseur(5)" v-if="outilDessiner || outilZirkel">
 				<span>5</span>
 			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 10 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 10 })" :aria-pressed="(epaisseurStylo === 10) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 10}" @click="modifierEpaisseur(10)" v-if="outilDessiner">
+			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 10 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 10 })" :aria-pressed="(epaisseurStylo === 10) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 10}" @click="modifierEpaisseur(10)" v-if="outilDessiner || outilZirkel">
 				<span>10</span>
 			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 20 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 20 })" :aria-pressed="(epaisseurStylo === 20) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 20}" @click="modifierEpaisseur(20)" v-if="outilDessiner">
+			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 20 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 20 })" :aria-pressed="(epaisseurStylo === 20) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 20}" @click="modifierEpaisseur(20)" v-if="outilDessiner || outilZirkel">
 				<span>20</span>
 			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 40 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 40 })" :aria-pressed="(epaisseurStylo === 40) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 40}" @click="modifierEpaisseur(40)" v-if="outilDessiner">
+			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 40 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 40 })" :aria-pressed="(epaisseurStylo === 40) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 40}" @click="modifierEpaisseur(40)" v-if="outilDessiner || outilZirkel">
 				<span>40</span>
 			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 80 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 80 })" :aria-pressed="(epaisseurStylo === 80) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 80}" @click="modifierEpaisseur(80)" v-if="outilDessiner">
+			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 80 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 80 })" :aria-pressed="(epaisseurStylo === 80) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 80}" @click="modifierEpaisseur(80)" v-if="outilDessiner || outilZirkel">
 				<span>80</span>
 			</button>
-			<span class="option label-transparence" v-if="outilDessiner">
+			<span class="option label-transparence" v-if="outilDessiner || outilZirkel || outilRemplir">
 				<span><i class="material-icons" aria-hidden="true">opacity</i></span>
 			</span>
-			<button type="button" class="option transparence" :title="$t('modifierOpacite', { opacite: 0.4 })" :aria-label="$t('modifierOpacite', { opacite: 0.4 })" :aria-pressed="(transparenceStylo === 0.4) ? 'true' : 'false'" :class="{'actif': transparenceStylo === 0.4}" v-if="outilDessiner" @click="modifierTransparence(0.4)">
+			<button type="button" class="option transparence" :title="$t('modifierOpacite', { opacite: 0.4 })" :aria-label="$t('modifierOpacite', { opacite: 0.4 })" :aria-pressed="(transparenceStylo === 0.4) ? 'true' : 'false'" :class="{'actif': transparenceStylo === 0.4}" v-if="outilDessiner || outilZirkel || outilRemplir" @click="modifierTransparence(0.4)">
 				<span>0.4</span>
 			</button>
-			<button type="button" class="option transparence" :title="$t('modifierOpacite', { opacite: 0.6 })" :aria-label="$t('modifierOpacite', { opacite: 0.6 })" :aria-pressed="(transparenceStylo === 0.6) ? 'true' : 'false'" :class="{'actif': transparenceStylo === 0.6}" v-if="outilDessiner" @click="modifierTransparence(0.6)">
+			<button type="button" class="option transparence" :title="$t('modifierOpacite', { opacite: 0.6 })" :aria-label="$t('modifierOpacite', { opacite: 0.6 })" :aria-pressed="(transparenceStylo === 0.6) ? 'true' : 'false'" :class="{'actif': transparenceStylo === 0.6}" v-if="outilDessiner || outilZirkel || outilRemplir" @click="modifierTransparence(0.6)">
 				<span>0.6</span>
 			</button>
-			<button type="button" class="option transparence" :title="$t('modifierOpacite', { opacite: 1 })" :aria-label="$t('modifierOpacite', { opacite: 1 })" :aria-pressed="(transparenceStylo === 1) ? 'true' : 'false'" :class="{'actif': transparenceStylo === 1}" v-if="outilDessiner" @click="modifierTransparence(1)">
+			<button type="button" class="option transparence" :title="$t('modifierOpacite', { opacite: 1 })" :aria-label="$t('modifierOpacite', { opacite: 1 })" :aria-pressed="(transparenceStylo === 1) ? 'true' : 'false'" :class="{'actif': transparenceStylo === 1}" v-if="outilDessiner || outilZirkel || outilRemplir" @click="modifierTransparence(1)">
 				<span>1</span>
 			</button>
 			<span class="separateur" v-if="outilSelectionner && nom !== 'selection'" />
@@ -221,6 +300,11 @@
 </template>
 
 <script>
+import zirkel from './annotation/zirkel.js'
+import geodreieck from './annotation/geodreieck.js'
+import remplir from './annotation/remplir.js'
+import arrierePlan from './annotation/arrierePlan.js'
+import '../assets/css/annotation-werkzeuge.css'
 import Konva from 'konva'
 import { markRaw, toRaw } from 'vue'
 
@@ -229,6 +313,7 @@ const tailleMaxHistorique = 50
 export default {
 	name: 'CAnnotation',
 	inject: ['app'],
+	mixins: [zirkel, geodreieck, remplir, arrierePlan],
 	props: {
 		panneaux: { type: Array, required: true },
 		annotations: { type: Object, required: true },
@@ -401,6 +486,8 @@ export default {
 			this.outilSelectionner = false
 			this.outilDeplacer = false
 			this.outilDessiner = false
+			this.outilZirkel = false
+			this.outilRemplir = false
 			if (type === 'selectionner') {
 				this.outilSelectionner = true
 				this.$emit('outilDeplacer', false)
@@ -411,6 +498,15 @@ export default {
 				this.desactiverSelecteur()
 			} else if (type === 'dessiner') {
 				this.outilDessiner = true
+				this.$emit('outilDeplacer', false)
+				this.activerSelecteur()
+			} else if (type === 'remplir') {
+				this.outilRemplir = true
+				this.$emit('outilDeplacer', false)
+				this.activerSelecteur()
+			} else if (type === 'zirkel') {
+				this.zirkelInitialiser()
+				this.outilZirkel = true
 				this.$emit('outilDeplacer', false)
 				this.activerSelecteur()
 			}
@@ -861,9 +957,26 @@ export default {
 					}
 					this.transformer()
 				}
+			} else if (this.outilRemplir) {
+				this.remplir(stage.getPointerPosition())
+			} else if (this.outilZirkel) {
+				const p = stage.getPointerPosition()
+				const fang = this.zirkelTrouverFang(p.x, p.y)
+				this.zirkel.x = fang ? fang.x : p.x
+				this.zirkel.y = fang ? fang.y : p.y
 			} else if (this.outilDessiner) {
 				this.validerDessin()
-				const position = stage.getPointerPosition()
+				let position = stage.getPointerPosition()
+				// Geodreieck: Setzt der Stift an einer Kante an, wird eine gerade Linie entlang dieser Kante gezeichnet
+				this.geoLineal = null
+				if (this.geoVisible) {
+					const kante = this.geoKanteProche(position.x, position.y)
+					if (kante) {
+						const debut = this.geoPointSurKante(kante, position.x, position.y)
+						this.geoLineal = { kante: kante, debut: debut }
+						position = { x: debut.x, y: debut.y }
+					}
+				}
 				this.pointeurStylo = event.evt.pointerId
 				try {
 					event.evt.target.setPointerCapture(event.evt.pointerId)
@@ -903,6 +1016,18 @@ export default {
 				}
 			} else if (this.outilDessiner) {
 				if (!this.traitStylo || event.evt.pointerId !== this.pointeurStylo) {
+					return
+				}
+				if (this.geoLineal) {
+					// Gerade Linie entlang der Geodreieck-Kante, mit Längenanzeige
+					const zeiger = stage.getPointerPosition()
+					const fin = this.geoPointSurKante(this.geoLineal.kante, zeiger.x, zeiger.y)
+					const debut = this.geoLineal.debut
+					this.traitStylo.points([debut.x, debut.y, fin.x, fin.y])
+					this.traitStylo.getLayer().batchDraw()
+					const k = this.geoLineal.kante
+					const longueur = Math.hypot(fin.x - debut.x, fin.y - debut.y) / this.zirkelPxParCm
+					this.geoLongueur = { x: fin.x - k.nx * 30, y: fin.y - k.ny * 30, texte: longueur.toFixed(1).replace('.', ',') + ' cm' }
 					return
 				}
 				const evenements = typeof event.evt.getCoalescedEvents === 'function' ? event.evt.getCoalescedEvents() : []
@@ -970,7 +1095,7 @@ export default {
 						this.objetVerrouille = false
 						this.desactiverSelecteur()
 					}
-				} else if (this.outil !== '' && this.outil !== 'etoile' && this.outil !== 'texte' && this.outil !== 'label' && this.largeurObjet > 0 && this.hauteurObjet > 0) {
+				} else if (this.outil !== '' && this.outil !== 'etoile' && this.outil !== 'texte' && this.outil !== 'label' && ((this.largeurObjet > 0 && this.hauteurObjet > 0) || ((this.outil === 'ligne' || this.outil === 'fleche') && (this.largeurObjet > 0 || this.hauteurObjet > 0)))) {
 					if (!this.creation) {
 						return
 					}
@@ -990,11 +1115,20 @@ export default {
 			}
 			const ligne = this.traitStylo
 			const calque = ligne.getLayer()
-			const points = this.reduirePoints(ligne.points(), 1)
+			// Am Geodreieck gezeichnete Linien exakt übernehmen (nicht vereinfachen) und als Strecke markieren
+			const lineal = this.geoLineal
+			this.geoLineal = null
+			this.geoLongueur = null
+			const points = lineal ? ligne.points().slice(0, 4) : this.reduirePoints(ligne.points(), 1)
 			this.traitStylo = null
 			this.pointeurStylo = null
 			this.id++
-			this.items.push({ name: 'dess' + this.id, objet: 'dessin', points: markRaw(points), globalCompositeOperation: 'source-over', stroke: ligne.stroke(), strokeWidth: ligne.strokeWidth(), opacity: ligne.opacity(), hitStrokeWidth: 25, lineJoin: 'round', lineCap: 'round', draggable: false, verrouille: false })
+			const element = { name: 'dess' + this.id, objet: 'dessin', points: markRaw(points), globalCompositeOperation: 'source-over', stroke: ligne.stroke(), strokeWidth: ligne.strokeWidth(), opacity: ligne.opacity(), hitStrokeWidth: 25, lineJoin: 'round', lineCap: 'round', draggable: false, verrouille: false }
+			if (lineal) {
+				element.droite = true
+				element.geoAussen = { x: -lineal.kante.nx, y: -lineal.kante.ny, d: ligne.strokeWidth() / 2 }
+			}
+			this.items.push(element)
 			this.nom = 'dess' + this.id
 			this.objet = 'dessin'
 			this.enregistrer()
@@ -1268,8 +1402,11 @@ export default {
 				case 'label':
 					item.tag.fill = couleur
 					break
+				case 'remplissage':
+					item.fill = couleur
+					break
 				}
-			} else if (this.outilDessiner) {
+			} else if (this.outilDessiner || this.outilZirkel || this.outilRemplir) {
 				this.couleurStylo = couleur
 			}
 			this.enregistrer()
@@ -1290,6 +1427,7 @@ export default {
 					ancres = ['top-left', 'top-center', 'top-right', 'middle-right', 'middle-left', 'bottom-left', 'bottom-center', 'bottom-right']
 					break
 				case 'labl':
+				case 'fill':
 				case 'imag':
 				case 'star':
 					ancres = ['top-left', 'top-right', 'bottom-left', 'bottom-right']

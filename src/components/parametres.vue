@@ -51,6 +51,12 @@
 						<button type="button" title="Seyes" aria-label="Seyes" @click="modifierFond('./static/img/seyes.png')">
 							<img src="@/assets/img/miniatures/seyes.png" alt="Seyes" style="border: 1px solid #ddd;">
 						</button>
+						<button type="button" :title="$t('lineaturHaeuschen')" :aria-label="$t('lineaturHaeuschen')" @click="modifierFond('./static/img/lineatur-haeuschen.svg')">
+							<img src="@/assets/img/miniatures/lineatur-haeuschen.png" :alt="$t('lineaturHaeuschen')" style="border: 1px solid #ddd;">
+						</button>
+						<button type="button" :title="$t('lineaturHaeuschenGross')" :aria-label="$t('lineaturHaeuschenGross')" @click="modifierFond('./static/img/lineatur-haeuschen-gross.svg')">
+							<img src="@/assets/img/miniatures/lineatur-haeuschen-gross.png" :alt="$t('lineaturHaeuschenGross')" style="border: 1px solid #ddd;">
+						</button>
 						<button type="button" :title="$t('quadrillage')" :aria-label="$t('quadrillage')" @click="modifierFond('./static/img/quadrillage.png')">
 							<img src="@/assets/img/miniatures/quadrillage.png" :alt="$t('quadrillage')" style="border: 1px solid #ddd;">
 						</button>

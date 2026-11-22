@@ -1,5 +1,5 @@
 <template>
-	<main :style="styleFond">
+	<main :style="styleFond" :class="{ 'sans-logo': fondBeschreibbar }">
 		<h1 class="lecteur-ecran">Digiscreen by La Digitale</h1>
 		<div id="alerte" v-if="alerte">
 			<div class="conteneur">
@@ -340,6 +340,17 @@
 		<MCorbeille :corbeille="corbeille" @retirer="retirerPanneauCorbeille" v-else-if="modale === 'corbeille'" />
 		<MParametres :admin="admin" v-if="menu" />
 
+		<div id="echelle-fond-direct" role="group" :aria-label="$t('echelleFond')" v-if="fondEcriture && !lectureSeule" :data-html2canvas-ignore="true">
+			<button type="button" :title="$t('echelleFondMoins')" :aria-label="$t('echelleFondMoins')" :disabled="echelleFond <= etapesEchelleFond[0]" @click="modifierEchelleFond(-1)"><i class="material-icons" aria-hidden="true">remove</i></button>
+			<button type="button" class="valeur" :title="$t('echelleFondReinitialiser')" :aria-label="$t('echelleFond') + ': ' + Math.round(echelleFond * 100) + ' %. ' + $t('echelleFondReinitialiser')" @click="modifierEchelleFond(0)">{{ Math.round(echelleFond * 100) }} %</button>
+			<button type="button" :title="$t('echelleFondPlus')" :aria-label="$t('echelleFondPlus')" :disabled="echelleFond >= etapesEchelleFond[etapesEchelleFond.length - 1]" @click="modifierEchelleFond(1)"><i class="material-icons" aria-hidden="true">add</i></button>
+			<span class="separateur" />
+			<button type="button" id="bouton-main-fond" :class="{'actif': deplacementFond}" :title="$t('fondVerschieben')" :aria-label="$t('fondVerschieben')" :aria-pressed="deplacementFond ? 'true' : 'false'" @click="basculerDeplacementFond"><i class="material-icons" aria-hidden="true">pan_tool</i></button>
+			<button type="button" id="bouton-centre-fond" :title="$t('fondZentrieren')" :aria-label="$t('fondZentrieren')" :disabled="decalageFond.x === 0 && decalageFond.y === 0" @click="recentrerFond"><i class="material-icons" aria-hidden="true">filter_center_focus</i></button>
+		</div>
+
+		<div id="surface-deplacement-fond" v-if="deplacementFond && fondEcriture && !lectureSeule" :data-html2canvas-ignore="true" @pointerdown="debutDeplacementFond" />
+
 		<div id="statut" aria-live="polite" />
 		<div id="notification" aria-live="polite" />
 
@@ -356,6 +367,7 @@
 </template>
 
 <script>
+import echelonnerAnnotations, { deplacerAnnotations } from './echelleAnnotations.js'
 import PCodeqr from '@/components/codeqr.vue'
 import PTexte from '@/components/texte.vue'
 import PSeyes from '@/components/seyes.vue'
@@ -521,6 +533,9 @@ export default {
 			motdepasse: '',
 			dgsId: '',
 			notification: {},
+			etapesEchelleFond: [0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3],
+			deplacementFond: false,
+			gesteFond: null,
 			encodeurCharge: false,
 			suppressionComplete: false,
 			elementPrecedent: null,
@@ -539,16 +554,43 @@ export default {
 		fond () {
 			return this.pages[this.page - 1].fond
 		},
+		fondBeschreibbar () {
+			const fond = this.fond || ''
+			return fond.substring(0, 1) === '#' || (fond.includes('/static/img/') && /\.(png|svg)$/.test(fond))
+		},
+		fondEcriture () {
+			// Beschreibbare Hintergründe (Linien, Karo, Punkte …) – diese lassen sich skalieren
+			return this.fond.includes('/static/img/') && /\.(png|svg)$/.test(this.fond)
+		},
+		decalageFond () {
+			// Verschiebung des beschreibbaren Hintergrunds in px
+			const page = this.pages[this.page - 1]
+			return this.fondEcriture && page && page.decalageFond ? page.decalageFond : { x: 0, y: 0 }
+		},
+		echelleFond () {
+			// Skalierung des beschreibbaren Hintergrunds, 1 = Originalgröße
+			const page = this.pages[this.page - 1]
+			return this.fondEcriture && page && page.echelleFond > 0 ? page.echelleFond : 1
+		},
 		styleFond () {
 			const image = 'url(' + recupererRessource(this.fond) + ')'
+			const e = this.echelleFond
+			// Höhe der Musterkachel in px (Originalgröße)
+			const hauteurs = { 'lineatur-haeuschen.svg': 140, 'lineatur-haeuschen-gross.svg': 224, 'seyes.png': 80, 'quadrillage-grand.png': 60, 'quadrillage-gris-grand.png': 60 }
+			const nom = this.fond.split('/').pop()
+			const taille = e === 1 ? 'auto' : 'auto ' + ((hauteurs[nom] || 30) * e) + 'px'
+			const d = this.decalageFond
+			const centre = 'calc(50% + ' + d.x + 'px) calc(50% + ' + d.y + 'px)'
 			if (this.fond.substring(0, 1) === '#') {
 				return { 'background-color': this.fond }
 			} else if (this.fond.includes('/img/partition.png')) {
-				return { 'background-image': image, 'background-size': 'contain', 'background-repeat': 'repeat' }
+				return { 'background-image': image, 'background-size': e === 1 ? 'contain' : 'auto ' + (100 * e) + '%', 'background-repeat': 'repeat', 'background-position': centre }
+			} else if (this.fond.includes('/img/lineatur-haeuschen')) {
+				return { 'background-color': '#ffffff', 'background-image': image, 'background-size': taille, 'background-repeat': 'repeat', 'background-position': d.x + 'px ' + d.y + 'px' }
 			} else if (this.fond.includes('/img/seyes.png')) {
-				return { 'background-color': '#ffffff', 'background-image': image, 'background-size': 'auto', 'background-repeat': 'repeat' }
+				return { 'background-color': '#ffffff', 'background-image': image, 'background-size': taille, 'background-repeat': 'repeat', 'background-position': centre }
 			} else if (this.fond.split('.').pop() === 'png') {
-				return { 'background-image': image, 'background-size': 'auto', 'background-repeat': 'repeat' }
+				return { 'background-image': image, 'background-size': taille, 'background-repeat': 'repeat', 'background-position': centre }
 			} else {
 				return { 'background-image': image }
 			}
@@ -566,6 +608,11 @@ export default {
 		},
 		importDonnees (valeur) {
 			if (valeur) this.annoncer(this.$t('chargementEnCours'))
+		},
+		fondEcriture (valeur) {
+			if (!valeur) {
+				this.deplacementFond = false
+			}
 		},
 		page (page) {
 			this.chargementPage = true
@@ -1156,6 +1203,74 @@ export default {
 					}
 				}
 			})
+		},
+		basculerDeplacementFond () {
+			this.deplacementFond = !this.deplacementFond
+		},
+		deplacerFondDe (dx, dy) {
+			const page = this.pages[this.page - 1]
+			if (!page || (dx === 0 && dy === 0)) {
+				return
+			}
+			const d = page.decalageFond || { x: 0, y: 0 }
+			page.decalageFond = { x: d.x + dx, y: d.y + dy }
+			// Ist das Annotieren geschlossen, die gespeicherten Objekte hier mitverschieben (sonst übernimmt das die Annotation selbst)
+			if (!this.annotation && page.annotations && Array.isArray(page.annotations.items)) {
+				deplacerAnnotations(page.annotations.items, dx, dy)
+			}
+		},
+		debutDeplacementFond (event) {
+			event.preventDefault()
+			this.gesteFond = { id: event.pointerId, x: event.clientX, y: event.clientY }
+			window.addEventListener('pointermove', this.mouvementDeplacementFond)
+			window.addEventListener('pointerup', this.finDeplacementFond)
+			window.addEventListener('pointercancel', this.finDeplacementFond)
+		},
+		mouvementDeplacementFond (event) {
+			const g = this.gesteFond
+			if (!g || event.pointerId !== g.id) {
+				return
+			}
+			event.preventDefault()
+			const dx = event.clientX - g.x
+			const dy = event.clientY - g.y
+			g.x = event.clientX
+			g.y = event.clientY
+			this.deplacerFondDe(dx, dy)
+		},
+		finDeplacementFond (event) {
+			const g = this.gesteFond
+			if (!g || event.pointerId !== g.id) {
+				return
+			}
+			window.removeEventListener('pointermove', this.mouvementDeplacementFond)
+			window.removeEventListener('pointerup', this.finDeplacementFond)
+			window.removeEventListener('pointercancel', this.finDeplacementFond)
+			this.gesteFond = null
+		},
+		recentrerFond () {
+			const d = this.decalageFond
+			this.deplacerFondDe(-d.x, -d.y)
+		},
+		modifierEchelleFond (sens) {
+			const etapes = this.etapesEchelleFond
+			let i = etapes.indexOf(this.echelleFond)
+			if (i === -1) {
+				i = etapes.indexOf(1)
+			}
+			const ancienne = this.echelleFond
+			const nouvelle = sens === 0 ? 1 : etapes[Math.min(Math.max(i + sens, 0), etapes.length - 1)]
+			const page = this.pages[this.page - 1]
+			// Ist das Annotieren geschlossen, die gespeicherten Objekte hier mitskalieren (sonst übernimmt das die Annotation selbst)
+			if (!this.annotation && nouvelle !== ancienne && page.annotations && Array.isArray(page.annotations.items) && page.annotations.items.length > 0) {
+				const main = document.querySelector('main')
+				const w = main ? main.clientWidth : window.innerWidth
+				const h = main ? main.clientHeight : window.innerHeight
+				const lineatur = this.fond.includes('/img/lineatur-haeuschen')
+				const d = this.decalageFond
+				echelonnerAnnotations(page.annotations.items, nouvelle / ancienne, (lineatur ? 0 : w / 2) + d.x, (lineatur ? 0 : h / 2) + d.y)
+			}
+			page.echelleFond = nouvelle
 		},
 		creerPanneau (type) {
 			if (type === 'retroaction' && this.retroaction === true) {
