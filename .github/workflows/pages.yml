@@ -1,0 +1,64 @@
+# Baut Digiscreen (Erweiterung Medienzentrum MTK) bei jedem Push auf „main“
+# und veröffentlicht die Webseite auf GitHub Pages.
+# Die lokal startbare Variante liegt danach unter „Actions“ → letzter Lauf → „Artifacts“ zum Download.
+name: Digiscreen bauen und veröffentlichen
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  bauen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Umgebungsdatei anlegen (API-Schlüssel optional als Repository-Secrets)
+        run: |
+          touch .env
+          mkdir -p vendor
+          [ -n "${{ secrets.VITE_PIXABAY_API_KEY }}" ] && echo "VITE_PIXABAY_API_KEY=${{ secrets.VITE_PIXABAY_API_KEY }}" >> .env || true
+          [ -n "${{ secrets.VITE_GOOGLE_API_KEY }}" ] && echo "VITE_GOOGLE_API_KEY=${{ secrets.VITE_GOOGLE_API_KEY }}" >> .env || true
+
+      - name: Bauen (Webseite + lokale Variante)
+        run: npm run build:varianten
+
+      - name: Lokale Variante zum Herunterladen bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: digiscreen-lokal
+          path: ausgabe/lokal
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: ausgabe/server
+
+  veroeffentlichen:
+    needs: bauen
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
