@@ -2,6 +2,7 @@
 //   ausgabe/server – statische Webseite (z. B. GitHub Pages), ohne PHP-Teil und ohne .env
 //   ausgabe/lokal  – startet per Doppelklick auf index.html direkt vom Rechner (file://)
 // Aufruf: npm run build:varianten
+import { execFileSync } from 'node:child_process'
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, normalize, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -75,6 +76,32 @@ if (!html.includes('./static/assets/' + js)) {
 	html = html.replace('</body>', '\t<script src="./static/assets/' + js + '"></script>\n\t</body>')
 }
 writeFileSync(join(lokal, 'index.html'), html)
+rmSync(join(lokal, 'README.md'), { force: true })
+writeFileSync(join(lokal, 'ANLEITUNG.txt'), [
+	'Digiscreen – Version des Medienzentrums Main-Taunus-Kreis (lokal startbar)',
+	'',
+	'1. Den ganzen Ordner auf den Rechner (oder einen USB-Stick) kopieren.',
+	'2. Die Datei index.html doppelklicken – Digiscreen öffnet sich im Browser.',
+	'',
+	'Die Grundfunktionen laufen ohne Internet. Einige Module (z. B. Bildersuche,',
+	'Videos, Einbettungen) brauchen weiterhin eine Internetverbindung.',
+	'',
+	'Online-Version: https://spundekees.github.io/digiscreenmtk/',
+	'Quellcode und Lizenz (GNU AGPLv3): https://github.com/spundekees/digiscreenmtk',
+	''
+].join('\r\n'))
+
+// Lokale Variante zusätzlich als ZIP auf die Webseite legen (verlinkt im „Über“-Fenster)
+const zipOrdner = join(ausgabe, 'digiscreen-lokal')
+rmSync(zipOrdner, { recursive: true, force: true })
+cpSync(lokal, zipOrdner, { recursive: true })
+try {
+	execFileSync('zip', ['-qr9', join('server', 'digiscreen-lokal.zip'), 'digiscreen-lokal'], { cwd: ausgabe })
+	console.log('  ' + join(server, 'digiscreen-lokal.zip') + '  (ZIP der lokalen Variante)')
+} catch {
+	console.warn('Hinweis: „zip“ nicht gefunden – digiscreen-lokal.zip wurde nicht erstellt.')
+}
+rmSync(zipOrdner, { recursive: true, force: true })
 
 console.log('Fertig:')
 console.log('  ' + server + '  (Webseite)')

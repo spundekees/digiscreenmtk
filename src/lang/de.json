@@ -159,6 +159,7 @@
 	"codeSource": "Quellcode",
 	"versionMtk": "Angepasste Version des Medienzentrums Main-Taunus-Kreis (u. a. mit Zirkel, Geodreieck, Füllwerkzeug und Grundschul-Lineatur).",
 	"codeSourceMtk": "Quellcode dieser Version",
+	"lokalMtk": "Offline-Version herunterladen (ZIP, startet per Doppelklick auf index.html)",
 	"horloge": "Uhr",
 	"sonometre": "Lautstärkemesser",
 	"sensibilite": "Sensivität",

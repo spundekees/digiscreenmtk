@@ -159,6 +159,7 @@
 	"codeSource": "Izvorni kod",
 	"versionMtk": "Prilagođena verzija Medienzentruma Main-Taunus-Kreis (među ostalim sa šestarom, geo-trokutom, alatom za ispunu i crtama za osnovnu školu).",
 	"codeSourceMtk": "Izvorni kod ove verzije",
+	"lokalMtk": "Preuzmi izvanmrežnu verziju (ZIP, pokreće se dvostrukim klikom na index.html)",
 	"horloge": "Sat",
 	"sonometre": "Mjerač razine zvuka",
 	"sensibilite": "Osjetljivost",

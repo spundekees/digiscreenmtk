@@ -51,7 +51,7 @@ Das Skript dazu: `scripts/varianten.mjs`.
 Die Datei `.github/workflows/pages.yml` baut bei jedem Push auf `main` beide Varianten:
 
 - Die **Webseite** wird automatisch auf GitHub Pages veröffentlicht.
-- Die **lokale Variante** liegt unter *Actions* → letzter Lauf → *Artifacts* → `digiscreen-lokal` zum Herunterladen.
+- Die **lokale Variante** gibt es als ZIP unter https://spundekees.github.io/digiscreenmtk/digiscreen-lokal.zip (verlinkt im „Über“-Fenster) und zusätzlich unter *Actions* → letzter Lauf → *Artifacts* → `digiscreen-lokal`.
 
 Einmalig einstellen: Repository → *Settings* → *Pages* → *Source*: **GitHub Actions**.
 
