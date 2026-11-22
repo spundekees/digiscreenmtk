@@ -21,6 +21,9 @@
 
 					<label id="libelle-parametres-1">{{ $t('arrierePlanPage') }}</label>
 					<div role="group" aria-labelledby="libelle-parametres-1" class="fond">
+						<button type="button" :title="$t('mainTaunus')" :aria-label="$t('mainTaunus')" @click="modifierFond('./static/img/main-taunus.jpg')">
+							<img src="@/assets/img/miniatures/main-taunus.jpg" :alt="$t('mainTaunus')">
+						</button>
 						<button type="button" :title="$t('digitales')" :aria-label="$t('digitales')" @click="modifierFond('./static/img/digitale.jpg')">
 							<img src="@/assets/img/miniatures/digitale.jpg" :alt="$t('digitales')">
 						</button>

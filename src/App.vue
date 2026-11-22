@@ -497,7 +497,7 @@ export default {
 			alerte: false,
 			largeur: 0,
 			hauteur: 0,
-			pages: [{ fond: './static/img/digitale.jpg', grille: {}, annotations: {}, annotation: false }],
+			pages: [{ fond: './static/img/main-taunus.jpg', grille: {}, annotations: {}, annotation: false }],
 			page: 1,
 			chargementPage: false,
 			modules: ['codeqr', 'texte', 'image', 'galerie', 'document', 'audio', 'video', 'lien', 'iframe', 'nuage', 'tirage-texte', 'tirage-image', 'histoire', 'plateau', 'des', 'feu', 'modalites', 'groupes', 'chrono', 'rebours', 'horloge', 'calendrier', 'retroaction', 'grille'],

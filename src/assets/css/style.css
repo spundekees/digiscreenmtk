@@ -447,9 +447,12 @@ main::after {
 	width: 300px;
 	height: 65px;
 	padding: 10px 16px;
-	background: url('@/assets/img/logo-mtk-medienzentrum.svg') center / contain no-repeat;
+	background: rgba(255, 255, 255, 0.6) url('@/assets/img/logo-mtk-medienzentrum.svg') center / contain no-repeat;
 	background-origin: content-box;
-	opacity: 0.3; /* 70 % Transparenz */
+	border-radius: 10px;
+	-webkit-backdrop-filter: blur(3px);
+	backdrop-filter: blur(3px);
+	opacity: 0.7; /* 30 % Transparenz */
 	pointer-events: none;
 }
 

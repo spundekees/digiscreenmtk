@@ -39,7 +39,7 @@ const ressourcesModules = {
 	sonometre: ['./static/audio/cloche.mp3']
 }
 
-const fonds = ['digitale.jpg', 'lavande.jpg', 'plage.jpg', 'lac.jpg', 'feuilles.jpg', 'arbre.jpg', 'aurore.jpg', 'points.png', 'lignes-horizontales.png', 'seyes.png', 'quadrillage.png', 'quadrillage-grand.png', 'quadrillage-gris.png', 'quadrillage-gris-grand.png', 'partition.png', 'lineatur-haeuschen.svg', 'lineatur-haeuschen-gross.svg'].map((fond) => './static/img/' + fond)
+const fonds = ['main-taunus.jpg', 'digitale.jpg', 'lavande.jpg', 'plage.jpg', 'lac.jpg', 'feuilles.jpg', 'arbre.jpg', 'aurore.jpg', 'points.png', 'lignes-horizontales.png', 'seyes.png', 'quadrillage.png', 'quadrillage-grand.png', 'quadrillage-gris.png', 'quadrillage-gris-grand.png', 'partition.png', 'lineatur-haeuschen.svg', 'lineatur-haeuschen-gross.svg'].map((fond) => './static/img/' + fond)
 
 function listerRessources (texte) {
 	const chemins = new Set(['./static/audio/photo.mp3', ...fonds, ...Object.values(ressourcesModules).flat()])
