@@ -1,98 +1,107 @@
 # Digiscreen
 
-Digiscreen est un fond d'écran interactif pour la classe en présence ou à distance. 
+> **Angepasste Version des Medienzentrums Main-Taunus-Kreis**
+> Dieses Repository basiert auf [Digiscreen von La Digitale](https://codeberg.org/ladigitale/digiscreen) (Emmanuel Zimmert) und wurde vom Medienzentrum MTK erweitert, u. a. um Zirkel, Geodreieck, Füllwerkzeug, Grundschul-Lineatur sowie skalierbare und verschiebbare Hintergründe.
+> Online: https://spundekees.github.io/digiscreenmtk/ – Hinweise zu Build und Veröffentlichung dieser Version stehen in [README-MTK.md](README-MTK.md).
+> Der folgende Text ist eine deutsche Übersetzung der README des Originalprojekts.
 
-L'application est publiée sous licence GNU AGPLv3.
-Sauf les fontes Anton, Baloo Bhaijaan 2, Barrio, Finger Paint, Fredericka The Great, Life Savers, Love Ya Like A Sister, Material Icons, Orbitron, Righteous, Roboto Serif et Roboto Mono (Apache License Version 2.0), la fonte Mona Sans Expanded (Sil Open Font Licence 1.1), la fonte Marelle (https://marelle.forge.apps.education.fr/index.html - Sil Open Font Licence 1.1), la fonte Luciole (https://www.luciole-vision.com/fr/index.html - CC BY 4.0) et la fonte OpenDyslexic (Sil Open Font Licence 1.1)
+Digiscreen ist ein interaktiver Bildschirmhintergrund für den Unterricht im Klassenzimmer oder auf Distanz.
 
-Les symboles pictographiques utilisés dans le module Histoire sont la propriété du Gouvernement d'Aragon et ont été créés par Sergio Palao pour ARASAAC (https://arasaac.org), qui les distribuent sous Licence Creative Commons BY-NC-SA 4.0.
+Die Anwendung wird unter der Lizenz GNU AGPLv3 veröffentlicht.
+Ausgenommen sind die Schriften Anton, Baloo Bhaijaan 2, Barrio, Finger Paint, Fredericka The Great, Life Savers, Love Ya Like A Sister, Material Icons, Orbitron, Righteous, Roboto Serif und Roboto Mono (Apache License Version 2.0), die Schrift Mona Sans Expanded (SIL Open Font Licence 1.1), die Schrift Marelle (https://marelle.forge.apps.education.fr/index.html – SIL Open Font Licence 1.1), die Schrift Luciole (https://www.luciole-vision.com/fr/index.html – CC BY 4.0) und die Schrift OpenDyslexic (SIL Open Font Licence 1.1).
 
-Les émojis utilisés dans les modules Rétroaction et Météo de l'humeur proviennent du projet OpenMoji (https://openmoji.org) et sont publiés sous Licence Creative Commons BY-SA 4.0.
+Die im Modul „Geschichte“ verwendeten Piktogramme sind Eigentum der Regierung von Aragonien und wurden von Sergio Palao für ARASAAC (https://arasaac.org) erstellt, die sie unter der Lizenz Creative Commons BY-NC-SA 4.0 verbreitet.
 
-Les sons utilisés dans le module Compte à rebours proviennent de la Sonothèque (https://lasonotheque.org) et sont publiés dans le domaine public.
+Die in den Modulen „Feedback“ und „Stimmungsbarometer“ verwendeten Emojis stammen aus dem Projekt OpenMoji (https://openmoji.org) und werden unter der Lizenz Creative Commons BY-SA 4.0 veröffentlicht.
 
-## Prérequis
+Die im Modul „Countdown“ verwendeten Klänge stammen aus der Sonothèque (https://lasonotheque.org) und sind gemeinfrei.
+
+## Voraussetzungen
 PHP 8.4+
 
-## Préparation et installation des dépendances
+## Vorbereitung und Installation der Abhängigkeiten
 ```
 npm install
-composer install (uniquement nécessaire en combinaison avec Digidrive)
+composer install (nur in Verbindung mit Digidrive erforderlich)
 ```
 
-## Lancement du serveur de développement
+## Entwicklungsserver starten
 ```
 npm run dev
 ```
 
-## Variables d'environnement (fichier .env.production à créer à la racine avant compilation)
+## Umgebungsvariablen (Datei .env.production vor dem Kompilieren im Hauptverzeichnis anlegen)
 ```
-AUTHORIZED_DOMAINS (liste des domaines externes autorisés, séparés par une virgule, par ex. ladigitale.dev,http://localhost:8080 / schéma facultatif, https par défaut / http accepté uniquement si APP_ENV=dev / vide ou * par défaut : tous les domaines peuvent appeler l'application, mais l'API Digidrive est désactivée, sauf avec * et APP_ENV=dev)
-APP_ENV (dev ou prod / prod par défaut / dev accepte les domaines en http et active l'API Digidrive avec AUTHORIZED_DOMAINS=*)
-VITE_GOOGLE_API_KEY (clé API Google pour Youtube)
-VITE_PIXABAY_API_KEY (clé API Pixabay)
-VITE_UMAMI_SCRIPT_URL (lien vers le script fourni par Umami pour l'analyse de trafic)
-VITE_UMAMI_WEBSITE_ID (id de site sur le serveur Umami)
-S3_ENDPOINT (endpoint S3 / uniquement nécessaire en combinaison avec Digidrive)
-S3_ACCESS_KEY (clé d'accès S3 / uniquement nécessaire en combinaison avec Digidrive)
-S3_SECRET_KEY (clé secrète d'accès S3 / uniquement nécessaire en combinaison avec Digidrive)
-S3_REGION (région du conteneur S3 / uniquement nécessaire en combinaison avec Digidrive)
-S3_BUCKET (nom du conteneur s3 / uniquement nécessaire en combinaison avec Digidrive)
-DIGIDRIVE_BASE (lien vers une instance Digidrive pour la validation des tickets d'ouverture des contenus / uniquement nécessaire si l'API Digidrive est utilisée)
-```
-
-## Variables d'environnement pour les limites de débit (facultatives)
-```
-TRUSTED_PROXIES (adresses ou réseaux CIDR des proxys inverses de confiance, séparés par une virgule, par ex. 10.0.0.0/8 / l'adresse du client est alors lue dans X-Forwarded-For / vide par défaut / les adresses IPv6 sont regroupées par préfixe /64)
-RATE_LIMIT_AUTHOR_FAILURES (mots de passe incorrects autorisés par adresse IP et par contenu, à l'ouverture, à l'enregistrement et dans l'API Digidrive / 20 par défaut)
-RATE_LIMIT_AUTHOR_WINDOW (durée de la fenêtre en secondes pour les mots de passe incorrects / 900 par défaut)
-RATE_LIMIT_CREATIONS (créations et téléversements de contenus par l'API Digidrive, par heure et par adresse IP / 600 par défaut)
-RATE_LIMIT_TICKET_FAILURES (tickets d'ouverture Digidrive refusés par 10 minutes et par adresse IP / 30 par défaut)
-RATE_LIMIT_OPENINGS (ouvertures de fichiers .dgs distants par 10 minutes et par adresse IP / 600 par défaut)
-RATE_LIMIT_NETWORK (récupérations d'icônes de sites par 10 minutes et par adresse IP / 150 par défaut)
+AUTHORIZED_DOMAINS (Liste der zugelassenen externen Domains, durch Komma getrennt, z. B. ladigitale.dev,http://localhost:8080 / Schema optional, Standard https / http nur bei APP_ENV=dev zulässig / leer oder * als Standard: alle Domains dürfen die Anwendung aufrufen, die Digidrive-API ist dann aber deaktiviert, außer bei * und APP_ENV=dev)
+APP_ENV (dev oder prod / Standard prod / dev erlaubt Domains mit http und aktiviert die Digidrive-API bei AUTHORIZED_DOMAINS=*)
+VITE_GOOGLE_API_KEY (Google-API-Schlüssel für YouTube)
+VITE_PIXABAY_API_KEY (Pixabay-API-Schlüssel)
+VITE_UMAMI_SCRIPT_URL (Link zum von Umami bereitgestellten Skript für die Zugriffsanalyse)
+VITE_UMAMI_WEBSITE_ID (Website-ID auf dem Umami-Server)
+S3_ENDPOINT (S3-Endpunkt / nur in Verbindung mit Digidrive erforderlich)
+S3_ACCESS_KEY (S3-Zugriffsschlüssel / nur in Verbindung mit Digidrive erforderlich)
+S3_SECRET_KEY (geheimer S3-Zugriffsschlüssel / nur in Verbindung mit Digidrive erforderlich)
+S3_REGION (Region des S3-Buckets / nur in Verbindung mit Digidrive erforderlich)
+S3_BUCKET (Name des S3-Buckets / nur in Verbindung mit Digidrive erforderlich)
+DIGIDRIVE_BASE (Link zu einer Digidrive-Instanz zur Prüfung der Öffnungs-Tickets für Inhalte / nur erforderlich, wenn die Digidrive-API genutzt wird)
 ```
 
-## Compilation et minification des fichiers
+## Umgebungsvariablen für Ratenbegrenzungen (optional)
+```
+TRUSTED_PROXIES (Adressen oder CIDR-Netze vertrauenswürdiger Reverse-Proxys, durch Komma getrennt, z. B. 10.0.0.0/8 / die Client-Adresse wird dann aus X-Forwarded-For gelesen / Standard leer / IPv6-Adressen werden nach /64-Präfix zusammengefasst)
+RATE_LIMIT_AUTHOR_FAILURES (erlaubte falsche Passwörter pro IP-Adresse und Inhalt beim Öffnen, beim Speichern und in der Digidrive-API / Standard 20)
+RATE_LIMIT_AUTHOR_WINDOW (Länge des Zeitfensters für falsche Passwörter in Sekunden / Standard 900)
+RATE_LIMIT_CREATIONS (Erstellen und Hochladen von Inhalten über die Digidrive-API pro Stunde und IP-Adresse / Standard 600)
+RATE_LIMIT_TICKET_FAILURES (abgelehnte Digidrive-Öffnungs-Tickets pro 10 Minuten und IP-Adresse / Standard 30)
+RATE_LIMIT_OPENINGS (Öffnen entfernter .dgs-Dateien pro 10 Minuten und IP-Adresse / Standard 600)
+RATE_LIMIT_NETWORK (Abrufe von Website-Icons pro 10 Minuten und IP-Adresse / Standard 150)
+```
+
+## Dateien kompilieren und minifizieren
 ```
 npm run build
 ```
 
-## Serveur PHP pour le développement en local
+## PHP-Server für die lokale Entwicklung
 ```
 php -S 127.0.0.1:8000
 ```
 
-## Protection des fichiers sensibles (production)
-Le fichier `.htaccess` fourni (copié dans `dist` lors de la compilation) bloque sous Apache l'accès direct au fichier `.env`, à la base SQLite et au dossier `vendor`. Avec Nginx, ajouter la règle suivante avant le bloc `location` qui transmet les fichiers `.php` à PHP-FPM, en adaptant le préfixe `/digiscreen/` au chemin de l'application (le supprimer si elle est servie à la racine du domaine) :
+## Schutz sensibler Dateien (Produktivbetrieb)
+Die mitgelieferte Datei `.htaccess` (wird beim Kompilieren nach `dist` kopiert) sperrt unter Apache den direkten Zugriff auf die Datei `.env`, die SQLite-Datenbank und den Ordner `vendor`. Bei Nginx folgende Regel vor dem `location`-Block einfügen, der `.php`-Dateien an PHP-FPM weiterreicht. Dabei das Präfix `/digiscreen/` an den Pfad der Anwendung anpassen (bzw. entfernen, wenn sie direkt im Hauptverzeichnis der Domain liegt):
 ```
 location ~ ^/digiscreen/(\.env$|inc/.+\.db(-journal)?$|vendor/) {
 	deny all;
 }
 ```
 
-## Démo
+## Demo
 https://ladigitale.dev/digiscreen/
 
-## Comment contribuer ?
-Pour signaler des bugs, proposer des améliorations ou de nouvelles fonctionnalités, vous pouvez ouvrir un ticket sur ce dépôt, publier un message sur [ce mur](https://digipad.app/p/8/64dab892e6eab) ou m'envoyer un e-mail.
+## Wie kann ich beitragen?
+*(Dieser Abschnitt bezieht sich auf das Originalprojekt von La Digitale.)*
 
-Les demandes d'ajouts (Pull Requests) ne sont plus acceptées pour le moment. En effet, une contribution au code nécessite souvent plusieurs heures pour être révisée et commentée et ce n'est pas toujours compatible avec les priorités et le temps que je peux consacrer au projet.
+Um Fehler zu melden, Verbesserungen oder neue Funktionen vorzuschlagen, kannst du ein Ticket im [Original-Repository](https://codeberg.org/ladigitale/digiscreen) eröffnen, eine Nachricht auf [dieser Pinnwand](https://digipad.app/p/8/64dab892e6eab) hinterlassen oder dem Autor eine E-Mail schicken.
 
-Il est possible de soutenir financièrement le projet via [Liberapay](https://liberapay.com/ladigitale/), [Open Collective](https://opencollective.com/ladigitale) ou [Stripe](https://donate.stripe.com/4gweWveqf2sc6KAcMO).
+Pull Requests werden derzeit nicht angenommen. Ein Code-Beitrag braucht oft mehrere Stunden, um geprüft und kommentiert zu werden, und das lässt sich nicht immer mit den Prioritäten und der Zeit vereinbaren, die der Autor für das Projekt aufwenden kann.
 
-Vous trouverez d'autres idées de contribution sur [cette page](https://ladigitale.dev/contribuer.html).
+Das Projekt kann finanziell über [Liberapay](https://liberapay.com/ladigitale/), [Open Collective](https://opencollective.com/ladigitale) oder [Stripe](https://donate.stripe.com/4gweWveqf2sc6KAcMO) unterstützt werden.
 
-Merci pour votre soutien ! N'hésitez pas à me contacter si vous avez des questions.
+Weitere Ideen, wie man beitragen kann, gibt es auf [dieser Seite](https://ladigitale.dev/contribuer.html).
 
-## Remerciements et crédits
-Traduction en italien par [Paolo Mauri](https://gitlab.com/maupao) et Roberto Marcolin (nilocram)
+Danke für deine Unterstützung! Bei Fragen kannst du dich gern beim Autor melden.
 
-Traduction en espagnol par [Fernando S. Delgado Trujillo](https://gitlab.com/fersdt)
+## Dank und Mitwirkende
+Italienische Übersetzung von [Paolo Mauri](https://gitlab.com/maupao) und Roberto Marcolin (nilocram)
 
-Traduction en néerlandais par Erik Devlies
+Spanische Übersetzung von [Fernando S. Delgado Trujillo](https://gitlab.com/fersdt)
 
-Traduction en allemand lors d'une action dans « la salle des profs » [#twitterlehrerzimmer](https://twitter.com/search?q=%23twitterlehrerzimmer) / [#twlz](https://twitter.com/search?q=%23twlz) par [@uivens](https://twitter.com/uivens) (Ulrich Ivens), [@eBildungslabor](https://twitter.com/eBildungslabor) (Nele Hirsch) et [@teachitalizer](https://twitter.com/teachitalizer) (Holger Skarba)
+Niederländische Übersetzung von Erik Devlies
 
-Traduction en croate par [Ksenija Lekić](https://gitlab.com/Ksenija66L)
+Deutsche Übersetzung im Rahmen einer Aktion im „Lehrerzimmer“ [#twitterlehrerzimmer](https://twitter.com/search?q=%23twitterlehrerzimmer) / [#twlz](https://twitter.com/search?q=%23twlz) von [@uivens](https://twitter.com/uivens) (Ulrich Ivens), [@eBildungslabor](https://twitter.com/eBildungslabor) (Nele Hirsch) und [@teachitalizer](https://twitter.com/teachitalizer) (Holger Skarba)
 
-Traduction en basque par [Eder Etxebarria](https://translate.codeberg.org/user/eder@betxepare.eus/)
+Kroatische Übersetzung von [Ksenija Lekić](https://gitlab.com/Ksenija66L)
+
+Baskische Übersetzung von [Eder Etxebarria](https://translate.codeberg.org/user/eder@betxepare.eus/)
+
+Erweiterungen der MTK-Version: Medienzentrum Main-Taunus-Kreis
