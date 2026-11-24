@@ -107,6 +107,8 @@
 					<label for="fonte">{{ $t('fonte') }}</label>
 					<select id="fonte" :value="app.fonte" @change="modifierFonte">
 						<option value="">{{ $t('fonteSysteme') }}</option>
+						<option value="Andika">Druckschrift (Andika)</option>
+						<option value="Playwrite DE Grund">Grundschrift (Playwrite DE Grund)</option>
 						<option value="Luciole">Luciole</option>
 						<option value="InclusiveSans">Inclusive Sans</option>
 						<option value="MonaSans">Mona Sans</option>

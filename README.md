@@ -8,7 +8,7 @@
 Digiscreen ist ein interaktiver Bildschirmhintergrund für den Unterricht im Klassenzimmer oder auf Distanz.
 
 Die Anwendung wird unter der Lizenz GNU AGPLv3 veröffentlicht.
-Ausgenommen sind die Schriften Anton, Baloo Bhaijaan 2, Barrio, Finger Paint, Fredericka The Great, Life Savers, Love Ya Like A Sister, Material Icons, Orbitron, Righteous, Roboto Serif und Roboto Mono (Apache License Version 2.0), die Schrift Mona Sans Expanded (SIL Open Font Licence 1.1), die Schrift Marelle (https://marelle.forge.apps.education.fr/index.html – SIL Open Font Licence 1.1), die Schrift Luciole (https://www.luciole-vision.com/fr/index.html – CC BY 4.0) und die Schrift OpenDyslexic (SIL Open Font Licence 1.1).
+Ausgenommen sind die Schriften Anton, Baloo Bhaijaan 2, Barrio, Finger Paint, Fredericka The Great, Life Savers, Love Ya Like A Sister, Material Icons, Orbitron, Righteous, Roboto Serif und Roboto Mono (Apache License Version 2.0), die Schrift Mona Sans Expanded (SIL Open Font Licence 1.1), die Schrift Marelle (https://marelle.forge.apps.education.fr/index.html – SIL Open Font Licence 1.1), die Schrift Luciole (https://www.luciole-vision.com/fr/index.html – CC BY 4.0) die Schrift OpenDyslexic (SIL Open Font Licence 1.1) sowie – in der MTK-Version ergänzt – die Schriften Andika (SIL International) und Playwrite DE Grund (TypeTogether), beide unter SIL Open Font Licence 1.1.
 
 Die im Modul „Geschichte“ verwendeten Piktogramme sind Eigentum der Regierung von Aragonien und wurden von Sergio Palao für ARASAAC (https://arasaac.org) erstellt, die sie unter der Lizenz Creative Commons BY-NC-SA 4.0 verbreitet.
 

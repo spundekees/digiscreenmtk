@@ -16,6 +16,7 @@
 							<v-text :config="item.text" />
 						</v-label>
 						<v-line :config="item" v-else-if="item.objet === 'dessin'" @dragstart="selectionnerObjet" @dragend="deplacerFin" />
+						<v-line :config="item" v-else-if="item.objet === 'gomme'" />
 						<v-path :config="item" v-else-if="item.objet === 'remplissage'" @dragstart="selectionnerObjet" @dragend="deplacerFin" @transformend="redimensionnerFin" />
 					</template>
 					<v-rect :config="configSelection" @dragend="deplacerFin" @transformend="redimensionnerFin" />
@@ -105,6 +106,9 @@
 			<button type="button" class="outil" :title="$t('dessiner')" :aria-label="$t('dessiner')" :aria-pressed="(outilDessiner) ? 'true' : 'false'" :class="{'actif': outilDessiner}" @click="definirOutilPrincipal('dessiner')">
 				<img src="@/assets/img/stylo.png" :alt="$t('dessiner')">
 			</button>
+			<button type="button" id="outil-gomme" class="outil" :title="$t('gomme')" :aria-label="$t('gomme')" :aria-pressed="outilGommer ? 'true' : 'false'" :class="{'actif': outilGommer}" @click="definirOutilPrincipal('gommer')">
+				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g stroke="#000" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M14.5 3.5l6 6-9.5 9.5H6.5l-3-3a1.4 1.4 0 0 1 0-2z" fill="#fff" /><path d="M8.5 9.5l6 6" fill="none" /><path d="M14.5 3.5l6 6-6 6-6-6z" fill="#ff8fa3" /><path d="M11 19h9.5" fill="none" /></g></svg>
+			</button>
 			<button type="button" id="outil-zirkel" class="outil" :title="$t('zirkel')" :aria-label="$t('zirkel')" :aria-pressed="outilZirkel ? 'true' : 'false'" :class="{'actif': outilZirkel}" @click="definirOutilPrincipal('zirkel')">
 				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="1.6" /><path d="M11 5.5L5.5 20M13 5.5l5.5 14.5M7.6 14.5h8.8" /></g></svg>
 			</button>
@@ -181,48 +185,48 @@
 				<span><i class="material-icons" aria-hidden="true">flip_to_back</i></span>
 			</button>
 			<span class="separateur" v-if="outilSelectionner" />
-			<button type="button" class="option noir" :title="$t('noir')" :aria-label="$t('noir')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#000000') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#000000'}" @click="modifierCouleur('#000000')" v-if="nom !== 'selection' && objet !== 'label'">
+			<button type="button" class="option noir" :title="$t('noir')" :aria-label="$t('noir')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#000000') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#000000'}" @click="modifierCouleur('#000000')" v-if="!outilGommer && nom !== 'selection' && objet !== 'label'">
 				<span class="couleur noir" />
 			</button>
-			<button type="button" class="option blanc" :title="$t('blanc')" :aria-label="$t('blanc')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffffff') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffffff'}" @click="modifierCouleur('#ffffff')" v-if="nom !== 'selection' && objet !== 'label'">
+			<button type="button" class="option blanc" :title="$t('blanc')" :aria-label="$t('blanc')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffffff') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffffff'}" @click="modifierCouleur('#ffffff')" v-if="!outilGommer && nom !== 'selection' && objet !== 'label'">
 				<span class="couleur blanc" />
 			</button>
-			<button type="button" class="option rouge" :title="$t('rouge')" :aria-label="$t('rouge')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ff0000') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ff0000'}" @click="modifierCouleur('#ff0000')" v-if="nom !== 'selection'">
+			<button type="button" class="option rouge" :title="$t('rouge')" :aria-label="$t('rouge')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ff0000') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ff0000'}" @click="modifierCouleur('#ff0000')" v-if="!outilGommer && nom !== 'selection'">
 				<span class="couleur rouge" />
 			</button>
-			<button type="button" class="option jaune" :title="$t('jaune')" :aria-label="$t('jaune')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffff00') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffff00'}" @click="modifierCouleur('#ffff00')" v-if="nom !== 'selection'">
+			<button type="button" class="option jaune" :title="$t('jaune')" :aria-label="$t('jaune')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffff00') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffff00'}" @click="modifierCouleur('#ffff00')" v-if="!outilGommer && nom !== 'selection'">
 				<span class="couleur jaune" />
 			</button>
-			<button type="button" class="option vert" :title="$t('vert')" :aria-label="$t('vert')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#00ff00') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#00ff00'}" @click="modifierCouleur('#00ff00')" v-if="nom !== 'selection'">
+			<button type="button" class="option vert" :title="$t('vert')" :aria-label="$t('vert')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#00ff00') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#00ff00'}" @click="modifierCouleur('#00ff00')" v-if="!outilGommer && nom !== 'selection'">
 				<span class="couleur vert" />
 			</button>
-			<button type="button" class="option bleu" :title="$t('bleu')" :aria-label="$t('bleu')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#04fdff') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#04fdff'}" @click="modifierCouleur('#04fdff')" v-if="nom !== 'selection'">
+			<button type="button" class="option bleu" :title="$t('bleu')" :aria-label="$t('bleu')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#04fdff') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#04fdff'}" @click="modifierCouleur('#04fdff')" v-if="!outilGommer && nom !== 'selection'">
 				<span class="couleur bleu" />
 			</button>
-			<span class="option icone" v-if="nom !== 'selection'" @click="definirCouleur">
+			<span class="option icone" v-if="!outilGommer && nom !== 'selection'" @click="definirCouleur">
 				<label for="couleur-annotation" :title="$t('selectionnerCouleur')"><i class="material-icons" aria-hidden="true">colorize</i></label>
 				<input id="couleur-annotation" type="color" tabindex="0" :aria-label="$t('selectionnerCouleur')" :value="couleurSelecteur">
 			</span>
 			<span class="separateur" v-if="outilDessiner || outilZirkel || outilRemplir" />
-			<span class="option label-epaisseur" v-if="outilDessiner || outilZirkel">
+			<span class="option label-epaisseur" v-if="outilDessiner || outilZirkel || outilGommer">
 				<span><i class="material-icons" aria-hidden="true">line_weight</i></span>
 			</span>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 2 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 2 })" :aria-pressed="(epaisseurStylo === 2) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 2}" @click="modifierEpaisseur(2)" v-if="outilDessiner || outilZirkel">
+			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 2 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 2 })" :aria-pressed="(epaisseurActive === 2) ? 'true' : 'false'" :class="{'actif': epaisseurActive === 2}" @click="modifierEpaisseur(2)" v-if="outilDessiner || outilZirkel || outilGommer">
 				<span>2</span>
 			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 5 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 5 })" :aria-pressed="(epaisseurStylo === 5) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 5}" @click="modifierEpaisseur(5)" v-if="outilDessiner || outilZirkel">
+			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 5 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 5 })" :aria-pressed="(epaisseurActive === 5) ? 'true' : 'false'" :class="{'actif': epaisseurActive === 5}" @click="modifierEpaisseur(5)" v-if="outilDessiner || outilZirkel || outilGommer">
 				<span>5</span>
 			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 10 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 10 })" :aria-pressed="(epaisseurStylo === 10) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 10}" @click="modifierEpaisseur(10)" v-if="outilDessiner || outilZirkel">
+			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 10 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 10 })" :aria-pressed="(epaisseurActive === 10) ? 'true' : 'false'" :class="{'actif': epaisseurActive === 10}" @click="modifierEpaisseur(10)" v-if="outilDessiner || outilZirkel || outilGommer">
 				<span>10</span>
 			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 20 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 20 })" :aria-pressed="(epaisseurStylo === 20) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 20}" @click="modifierEpaisseur(20)" v-if="outilDessiner || outilZirkel">
+			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 20 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 20 })" :aria-pressed="(epaisseurActive === 20) ? 'true' : 'false'" :class="{'actif': epaisseurActive === 20}" @click="modifierEpaisseur(20)" v-if="outilDessiner || outilZirkel || outilGommer">
 				<span>20</span>
 			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 40 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 40 })" :aria-pressed="(epaisseurStylo === 40) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 40}" @click="modifierEpaisseur(40)" v-if="outilDessiner || outilZirkel">
+			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 40 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 40 })" :aria-pressed="(epaisseurActive === 40) ? 'true' : 'false'" :class="{'actif': epaisseurActive === 40}" @click="modifierEpaisseur(40)" v-if="outilDessiner || outilZirkel || outilGommer">
 				<span>40</span>
 			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 80 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 80 })" :aria-pressed="(epaisseurStylo === 80) ? 'true' : 'false'" :class="{'actif': epaisseurStylo === 80}" @click="modifierEpaisseur(80)" v-if="outilDessiner || outilZirkel">
+			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 80 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 80 })" :aria-pressed="(epaisseurActive === 80) ? 'true' : 'false'" :class="{'actif': epaisseurActive === 80}" @click="modifierEpaisseur(80)" v-if="outilDessiner || outilZirkel || outilGommer">
 				<span>80</span>
 			</button>
 			<span class="option label-transparence" v-if="outilDessiner || outilZirkel || outilRemplir">
@@ -301,6 +305,7 @@
 
 <script>
 import zirkel from './annotation/zirkel.js'
+import gomme from './annotation/gomme.js'
 import geodreieck from './annotation/geodreieck.js'
 import remplir from './annotation/remplir.js'
 import arrierePlan from './annotation/arrierePlan.js'
@@ -313,7 +318,7 @@ const tailleMaxHistorique = 50
 export default {
 	name: 'CAnnotation',
 	inject: ['app'],
-	mixins: [zirkel, geodreieck, remplir, arrierePlan],
+	mixins: [zirkel, geodreieck, remplir, arrierePlan, gomme],
 	props: {
 		panneaux: { type: Array, required: true },
 		annotations: { type: Object, required: true },
@@ -450,6 +455,8 @@ export default {
 	created () {
 		this.historique = []
 		this.traitStylo = null
+		this.traitGomme = null
+		this.curseurGomme = null
 		this.pointeurStylo = null
 	},
 	mounted () {
@@ -470,6 +477,12 @@ export default {
 			this.dimensionsCanva.h = rect.height
 		}
 		document.addEventListener('keydown', this.gererClavierAnnotation, false)
+		// Schulschrift für Texte nachladen und danach neu zeichnen
+		if (document.fonts && document.fonts.load) {
+			Promise.all([document.fonts.load('30px "Playwrite DE Grund"'), document.fonts.load('30px Andika')]).then(() => {
+				this.$refs.objets?.getNode()?.batchDraw()
+			}).catch(() => {})
+		}
 	},
 	beforeUnmount () {
 		if (document.querySelector('#couleur-annotation')) {
@@ -488,6 +501,7 @@ export default {
 			this.outilDessiner = false
 			this.outilZirkel = false
 			this.outilRemplir = false
+			this.outilGommer = false
 			if (type === 'selectionner') {
 				this.outilSelectionner = true
 				this.$emit('outilDeplacer', false)
@@ -500,6 +514,10 @@ export default {
 				this.outilDessiner = true
 				this.$emit('outilDeplacer', false)
 				this.activerSelecteur()
+			} else if (type === 'gommer') {
+				this.outilGommer = true
+				this.$emit('outilDeplacer', false)
+				this.desactiverSelecteur()
 			} else if (type === 'remplir') {
 				this.outilRemplir = true
 				this.$emit('outilDeplacer', false)
@@ -575,12 +593,12 @@ export default {
 				this.objet = 'fleche'
 				break
 			case 'texte':
-				this.items.push({ name: 'text' + this.id, objet: 'texte', text: this.texte, fontSize: 30, lineHeight: 1.25, verticalAlign: 'middle', padding: 10, x: this.positionX1, y: this.positionY1, rotation: 0, scaleX: 1, scaleY: 1, fill: '#ff0000', opacity: 1, wrap: 'word', draggable: true, verrouille: false })
+				this.items.push({ name: 'text' + this.id, objet: 'texte', text: this.texte, fontFamily: 'Andika', fontSize: 30, lineHeight: 1.25, verticalAlign: 'middle', padding: 10, x: this.positionX1, y: this.positionY1, rotation: 0, scaleX: 1, scaleY: 1, fill: '#ff0000', opacity: 1, wrap: 'word', draggable: true, verrouille: false })
 				this.nom = 'text' + this.id
 				this.objet = 'texte'
 				break
 			case 'label':
-				this.items.push({ name: 'labl' + this.id, objet: 'label', x: this.positionX1, y: this.positionY1, rotation: 0, opacity: 1, draggable: true, verrouille: false, tag: { name: 'labl' + this.id, objet: 'label', shadowColor: '#222222', shadowBlur: 10, shadowOffset: [7, 7], shadowOpacity: 0.2, fill: '#ffff00' }, text: { name: 'labl' + this.id, objet: 'label', text: this.texte, fontSize: 25, lineHeight: 1.25, verticalAlign: 'middle', fill: '#000000', padding: 15, wrap: 'word', align: 'center' } })
+				this.items.push({ name: 'labl' + this.id, objet: 'label', x: this.positionX1, y: this.positionY1, rotation: 0, opacity: 1, draggable: true, verrouille: false, tag: { name: 'labl' + this.id, objet: 'label', shadowColor: '#222222', shadowBlur: 10, shadowOffset: [7, 7], shadowOpacity: 0.2, fill: '#ffff00' }, text: { fontFamily: 'Andika', name: 'labl' + this.id, objet: 'label', text: this.texte, fontSize: 25, lineHeight: 1.25, verticalAlign: 'middle', fill: '#000000', padding: 15, wrap: 'word', align: 'center' } })
 				this.nom = 'labl' + this.id
 				this.objet = 'label'
 				break
@@ -957,6 +975,8 @@ export default {
 					}
 					this.transformer()
 				}
+			} else if (this.outilGommer) {
+				this.gommeDebut(event, stage)
 			} else if (this.outilRemplir) {
 				this.remplir(stage.getPointerPosition())
 			} else if (this.outilZirkel) {
@@ -1014,6 +1034,8 @@ export default {
 					this.largeurObjet = Math.abs(this.positionX2 - this.positionX1)
 					this.hauteurObjet = Math.abs(this.positionY2 - this.positionY1)
 				}
+			} else if (this.outilGommer) {
+				this.gommeMouvement(event, stage)
 			} else if (this.outilDessiner) {
 				if (!this.traitStylo || event.evt.pointerId !== this.pointeurStylo) {
 					return
@@ -1069,7 +1091,7 @@ export default {
 					const transformer = this.$refs.transformer.getNode()
 					const stage = transformer.getStage()
 					const objets = stage.find((item) => {
-						return item.getAttrs().objet && item.getAttrs().name.substring(0, 4) !== 'ancr'
+						return item.getAttrs().objet && item.getAttrs().objet !== 'gomme' && item.getAttrs().name.substring(0, 4) !== 'ancr'
 					})
 					const rect = stage.findOne('.selection').getClientRect()
 					const selection = objets.filter(item => Konva.Util.haveIntersection(rect, item.getClientRect()))
@@ -1102,6 +1124,8 @@ export default {
 					this.dessinerForme(this.outil)
 					this.activerSelecteur()
 				}
+			} else if (this.outilGommer) {
+				this.gommeFin(event)
 			} else if (this.outilDessiner) {
 				if (event && event.evt && event.evt.pointerId !== this.pointeurStylo) {
 					return
@@ -1188,7 +1212,7 @@ export default {
 			if (Array.isArray(items)) {
 				toRaw(items).forEach((item) => {
 					const itemBrut = toRaw(item)
-					if (itemBrut && itemBrut.objet === 'dessin' && Array.isArray(itemBrut.points)) {
+					if (itemBrut && (itemBrut.objet === 'dessin' || itemBrut.objet === 'gomme') && Array.isArray(itemBrut.points)) {
 						itemBrut.points = markRaw(toRaw(itemBrut.points))
 					}
 				})
@@ -1412,6 +1436,10 @@ export default {
 			this.enregistrer()
 		},
 		modifierEpaisseur (epaisseur) {
+			if (this.outilGommer) {
+				this.epaisseurGomme = epaisseur
+				return
+			}
 			this.epaisseurStylo = epaisseur
 		},
 		modifierTransparence (transparence) {

@@ -1,5 +1,5 @@
 <template>
-	<main :style="styleFond" :class="{ 'sans-logo': fondBeschreibbar }">
+	<main :style="styleFond" :class="{ 'sans-logo': fondBeschreibbar && page !== 1, 'logo-bas': fondEcriture && !lectureSeule }">
 		<h1 class="lecteur-ecran">Digiscreen by La Digitale</h1>
 		<div id="alerte" v-if="alerte">
 			<div class="conteneur">
@@ -497,14 +497,14 @@ export default {
 			alerte: false,
 			largeur: 0,
 			hauteur: 0,
-			pages: [{ fond: './static/img/main-taunus.jpg', grille: {}, annotations: {}, annotation: false }],
+			pages: [{ fond: './static/img/quadrillage.png', grille: {}, annotations: {}, annotation: false }],
 			page: 1,
 			chargementPage: false,
 			modules: ['codeqr', 'texte', 'image', 'galerie', 'document', 'audio', 'video', 'lien', 'iframe', 'nuage', 'tirage-texte', 'tirage-image', 'histoire', 'plateau', 'des', 'feu', 'modalites', 'groupes', 'chrono', 'rebours', 'horloge', 'calendrier', 'retroaction', 'grille'],
 			panneaux: [],
 			panneauxPage: [],
 			langue: 'fr',
-			fonte: '',
+			fonte: 'Andika',
 			pleinEcran: false,
 			listeVoix: [],
 			modale: '',
@@ -603,6 +603,12 @@ export default {
 		}
 	},
 	watch: {
+		modules: {
+			handler () {
+				this.$nextTick(this.ajusterNav)
+			},
+			deep: true
+		},
 		chargement (valeur) {
 			if (valeur) this.annoncer(this.$t('chargementEnCours'))
 		},
@@ -634,6 +640,7 @@ export default {
 			if (!valeur) {
 				this.$nextTick(() => {
 					this.activerDefilementHorizontal()
+					this.ajusterNav()
 				})
 			}
 		},
@@ -1115,6 +1122,13 @@ export default {
 		})
 
 		window.addEventListener('resize', this.verifierDimensions, false)
+
+		// Untere Programmleiste: alle Buttons sichtbar (Medienzentrum MTK)
+		window.addEventListener('resize', this.ajusterNav, false)
+		this.$nextTick(this.ajusterNav)
+		if (document.fonts && document.fonts.ready) {
+			document.fonts.ready.then(() => this.ajusterNav())
+		}
 
 		window.addEventListener('beforeunload', this.quitterPage, false)
 
@@ -2029,6 +2043,19 @@ export default {
 		convertirRem (valeur) {
 			const taille = window.getComputedStyle(document.querySelector('html'), null).getPropertyValue('font-size')
 			return typeof valeur !== 'undefined' && valeur >= 0 ? parseFloat(taille) * valeur : parseFloat(taille)
+		},
+		ajusterNav () {
+			const nav = document.querySelector('nav')
+			if (!nav) {
+				return
+			}
+			// Mehrzeilig umbrechen; braucht es mehr als zwei Reihen, kompakt ohne Beschriftung
+			const reihen = () => new Set(Array.from(nav.querySelectorAll('button')).map(bouton => bouton.offsetTop)).size
+			nav.classList.remove('compact')
+			if (reihen() > 2) {
+				nav.classList.add('compact')
+			}
+			document.documentElement.style.setProperty('--hauteur-nav', nav.offsetHeight + 'px')
 		},
 		activerDefilementHorizontal () {
 			const nav = document.querySelector('nav')

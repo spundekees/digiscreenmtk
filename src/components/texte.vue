@@ -55,7 +55,7 @@ export default {
 			donnees: { w: 0, h: 0, x: 0, y: 0 },
 			editeur: '',
 			texte: '',
-			fonte: 'Luciole',
+			fonte: 'Andika',
 			taille: 3.2,
 			couleurFond: '#ffffff'
 		}
@@ -159,7 +159,7 @@ export default {
 				actions: [
 					{ name: 'taille-plus', title: this.$t('tailleTextePlus'), icon: '<i class="material-icons" aria-hidden="true">add</i>', result: () => this.augmenterTaille() },
 					{ name: 'taille-moins', title: this.$t('tailleTexteMoins'), icon: '<i class="material-icons" aria-hidden="true">remove</i>', result: () => this.reduireTaille() },
-					{ name: 'fonte', title: '', icon: '<select id="fonte-' + this.id + '"><option value="Luciole">Luciole</option><option value="InclusiveSans">Inclusive Sans</option><option value="MonaSans">Mona Sans</option><option value="RobotoSerif">Roboto Serif</option><option value="RobotoMono">Roboto Mono</option><option value="OpenDyslexic">OpenDyslexic</option></select>', result: () => void 0 },
+					{ name: 'fonte', title: '', icon: '<select id="fonte-' + this.id + '"><option value="Andika">Druckschrift</option><option value="Playwrite DE Grund">Grundschrift</option><option value="Luciole">Luciole</option><option value="InclusiveSans">Inclusive Sans</option><option value="MonaSans">Mona Sans</option><option value="RobotoSerif">Roboto Serif</option><option value="RobotoMono">Roboto Mono</option><option value="OpenDyslexic">OpenDyslexic</option></select>', result: () => void 0 },
 					{ name: 'gras', shortcut: 'b', title: this.$t('gras'), icon: '<i class="material-icons" aria-hidden="true">format_bold</i>', result: () => pell.exec('bold') },
 					{ name: 'italique', shortcut: 'i', title: this.$t('italique'), icon: '<i class="material-icons" aria-hidden="true">format_italic</i>', result: () => pell.exec('italic') },
 					{ name: 'souligner', shortcut: 'u', title: this.$t('souligner'), icon: '<i class="material-icons" aria-hidden="true">format_underlined</i>', result: () => pell.exec('underline') },
@@ -614,7 +614,8 @@ export default {
 
 .panneau .panneau-texte select {
 	height: 2.4rem;
-	padding: 0 3rem 0 1.5rem!important;
+	width: 14rem!important;
+	padding: 0 2.6rem 0 1rem!important;
 	line-height: 1!important;
 }
 </style>

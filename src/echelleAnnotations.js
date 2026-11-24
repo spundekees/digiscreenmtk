@@ -18,7 +18,7 @@ export default function echelonnerAnnotations (items, f, px, py) {
 		const oy = item.y || 0
 		const sx = item.scaleX || 1
 		const sy = item.scaleY || 1
-		const pointBase = (item.objet === 'dessin' || item.objet === 'ligne' || item.objet === 'fleche') && Array.isArray(item.points) && !item.rotation
+		const pointBase = (item.objet === 'dessin' || item.objet === 'gomme' || item.objet === 'ligne' || item.objet === 'fleche') && Array.isArray(item.points) && !item.rotation
 		if (pointBase) {
 			// Geodreieck-Strecken liegen um die halbe Strichdicke neben der Kante: diesen Abstand beibehalten
 			const ax = item.geoAussen ? item.geoAussen.x * item.geoAussen.d : 0
@@ -63,7 +63,7 @@ export function deplacerAnnotations (items, dx, dy) {
 		if (!item || typeof item !== 'object') {
 			return
 		}
-		const pointBase = (item.objet === 'dessin' || item.objet === 'ligne' || item.objet === 'fleche') && Array.isArray(item.points) && !item.rotation && (item.scaleX || 1) === 1 && (item.scaleY || 1) === 1
+		const pointBase = (item.objet === 'dessin' || item.objet === 'gomme' || item.objet === 'ligne' || item.objet === 'fleche') && Array.isArray(item.points) && !item.rotation && (item.scaleX || 1) === 1 && (item.scaleY || 1) === 1
 		if (pointBase) {
 			const ox = (item.x || 0) + dx
 			const oy = (item.y || 0) + dy

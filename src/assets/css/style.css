@@ -117,6 +117,47 @@
 	font-display: swap;
 }
 
+/* Schulschriften (Medienzentrum MTK) – SIL Open Font License 1.1 */
+@font-face {
+	font-family: 'Andika';
+	src: url('@/assets/fonts/Andika-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Andika';
+	src: url('@/assets/fonts/Andika-Italic.woff2') format('woff2');
+	font-weight: 400;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Andika';
+	src: url('@/assets/fonts/Andika-Bold.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Andika';
+	src: url('@/assets/fonts/Andika-BoldItalic.woff2') format('woff2');
+	font-weight: 700;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Playwrite DE Grund';
+	src: url('@/assets/fonts/PlaywriteDEGrund-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
 @font-face {
 	font-family: 'Luciole';
 	src: url('@/assets/fonts/Luciole-Regular.woff2') format('woff2');
@@ -447,13 +488,17 @@ main::after {
 	width: 300px;
 	height: 65px;
 	padding: 10px 16px;
-	background: rgba(255, 255, 255, 0.6) url('@/assets/img/logo-mtk-medienzentrum.svg') center / contain no-repeat;
+	background: rgba(255, 255, 255, 0.3) url('@/assets/img/logo-mtk-medienzentrum.svg') center / contain no-repeat;
 	background-origin: content-box;
-	border-radius: 10px;
+	border-radius: 10px; /* Hintergrund 70 % transparent, Logo voll deckend */
 	-webkit-backdrop-filter: blur(3px);
 	backdrop-filter: blur(3px);
-	opacity: 0.7; /* 30 % Transparenz */
 	pointer-events: none;
+}
+
+/* Auf Schreibhintergründen sitzt oben rechts die Zoom-Leiste – Logo darunter */
+main.logo-bas::after {
+	top: calc(1.2rem + 3.4rem);
 }
 
 main.sans-logo::after {
@@ -1535,4 +1580,65 @@ nav .separateur {
 
 #surface-deplacement-fond:active {
 	cursor: grabbing;
+}
+
+/* Untere Programmleiste: Buttons brechen um, damit auf jedem Bildschirm alle sichtbar sind (Medienzentrum MTK)
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+nav,
+nav.compact {
+	flex-wrap: wrap;
+	justify-content: center;
+	align-content: center;
+	row-gap: 0.5rem;
+	height: auto;
+	min-height: 7.5rem;
+	padding: 0.6rem 11rem;
+	overflow: visible;
+}
+
+nav.masque {
+	bottom: calc(-1 * var(--hauteur-nav, 7.5rem) - 2px);
+}
+
+nav button:first-child,
+nav button:last-child {
+	margin-left: 0.3rem;
+	margin-right: 0.3rem;
+}
+
+nav.compact button {
+	flex: 0 0 3.8rem;
+	margin: 0 0.15rem;
+}
+
+nav.compact .icone {
+	width: 3.6rem;
+	padding: 0.6rem 0;
+}
+
+nav.compact .icone i {
+	font-size: 2.2rem;
+}
+
+nav.compact .titre {
+	display: none;
+}
+
+nav .separateur {
+	margin-bottom: 0;
+	line-height: 1;
+}
+
+#pages {
+	bottom: var(--hauteur-nav, 7.5rem);
+}
+
+#grille {
+	bottom: var(--hauteur-nav, 7.5rem);
+}
+
+@media screen and (max-width: 1279px) {
+	nav {
+		padding: 0.6rem 11rem 0.6rem 1rem;
+	}
 }
