@@ -1,5 +1,5 @@
 <template>
-	<main :style="styleFond" :class="{ 'sans-logo': fondBeschreibbar && page !== 1, 'logo-bas': fondEcriture && !lectureSeule }">
+	<main :style="styleFond">
 		<h1 class="lecteur-ecran">Digiscreen by La Digitale</h1>
 		<div id="alerte" v-if="alerte">
 			<div class="conteneur">
@@ -321,6 +321,7 @@
 				<span class="icone"><i class="material-icons" aria-hidden="true">info</i></span>
 				<span class="titre">{{ $t('aPropos') }}</span>
 			</button>
+			<img class="logo-nav" src="@/assets/img/logo-mtk-medienzentrum.svg" alt="Medienzentrum Main-Taunus-Kreis">
 		</nav>
 
 		<button type="button" class="bouton-capture" :disabled="disabled" :title="$t('capturer')" :aria-label="$t('capturer')" v-if="lectureSeule" @click="capturer" :data-html2canvas-ignore="true"><i class="material-icons" aria-hidden="true">camera</i></button>

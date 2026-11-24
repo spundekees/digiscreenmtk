@@ -479,32 +479,6 @@ main {
 	background-repeat: no-repeat;
 }
 
-main::after {
-	position: absolute;
-	top: 1.5vh;
-	right: 1.5vw;
-	content: '';
-	box-sizing: content-box;
-	width: 300px;
-	height: 65px;
-	padding: 10px 16px;
-	background: rgba(255, 255, 255, 0.3) url('@/assets/img/logo-mtk-medienzentrum.svg') center / contain no-repeat;
-	background-origin: content-box;
-	border-radius: 10px; /* Hintergrund 70 % transparent, Logo voll deckend */
-	-webkit-backdrop-filter: blur(3px);
-	backdrop-filter: blur(3px);
-	pointer-events: none;
-}
-
-/* Auf Schreibhintergründen sitzt oben rechts die Zoom-Leiste – Logo darunter */
-main.logo-bas::after {
-	top: calc(1.2rem + 3.4rem);
-}
-
-main.sans-logo::after {
-	display: none;
-}
-
 #alerte {
 	position: fixed;
 	top: 0;
@@ -1459,7 +1433,7 @@ nav .separateur {
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 .notification {
 	position: fixed;
-	top: 25px;
+	top: calc(1.2rem + 5rem); /* unter der Zoom-Leiste (Medienzentrum MTK) */
 	right: 15px;
 	font-size: 15px;
 	width: 300px;
@@ -1592,7 +1566,7 @@ nav.compact {
 	row-gap: 0.5rem;
 	height: auto;
 	min-height: 7.5rem;
-	padding: 0.6rem 11rem;
+	padding: 0.6rem 10.5rem 0.6rem 21rem;
 	overflow: visible;
 }
 
@@ -1600,10 +1574,11 @@ nav.masque {
 	bottom: calc(-1 * var(--hauteur-nav, 7.5rem) - 2px);
 }
 
+nav button,
 nav button:first-child,
 nav button:last-child {
-	margin-left: 0.3rem;
-	margin-right: 0.3rem;
+	margin-left: 0.2rem;
+	margin-right: 0.2rem;
 }
 
 nav.compact button {
@@ -1637,9 +1612,30 @@ nav .separateur {
 	bottom: var(--hauteur-nav, 7.5rem);
 }
 
-@media screen and (max-width: 1279px) {
-	nav {
+/* MTK-Logo links in der unteren Leiste */
+nav .logo-nav {
+	position: absolute;
+	left: 1rem;
+	top: 50%;
+	transform: translateY(-50%);
+	box-sizing: content-box;
+	height: 3.8rem;
+	width: auto;
+	padding: 0.5rem 0.9rem;
+	background: rgba(255, 255, 255, 0.92);
+	border-radius: 0.6rem;
+	pointer-events: none;
+	user-select: none;
+}
+
+@media screen and (max-width: 899px) {
+	nav,
+	nav.compact {
 		padding: 0.6rem 11rem 0.6rem 1rem;
+	}
+
+	nav .logo-nav {
+		display: none;
 	}
 }
 
