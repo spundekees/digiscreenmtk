@@ -1,8 +1,8 @@
 <template>
 	<div id="conteneur-menu">
-		<div id="menu-parametres" class="menu" role="dialog" aria-modal="true" :aria-label="$t('options')" @keydown="gererClavierParametres" :class="{'ouvert': ouvert}">
+		<div id="menu-parametres" class="menu" role="dialog" aria-modal="true" :aria-label="app.menuFonds ? $t('hintergruende') : $t('options')" @keydown="gererClavierParametres" :class="{'ouvert': ouvert, 'nur-fonds': app.menuFonds}">
 			<header>
-				<span class="titre">{{ $t('options') }}</span>
+				<span class="titre">{{ app.menuFonds ? $t('hintergruende') : $t('options') }}</span>
 				<button type="button" class="fermer" :title="$t('fermer')" :aria-label="$t('fermer')" @click="app.fermerMenu"><i class="material-icons" aria-hidden="true">close</i></button>
 			</header>
 			<div class="conteneur">

@@ -285,6 +285,10 @@
 			<div class="separateur">
 				<span>·</span>
 			</div>
+			<button type="button" id="bouton-fonds" :disabled="disabledNav" :title="$t('hintergruende')" :aria-label="$t('hintergruende')" @click="ouvrirMenuFonds">
+				<span class="icone"><i class="material-icons" aria-hidden="true">wallpaper</i></span>
+				<span class="titre">{{ $t('hintergruende') }}</span>
+			</button>
 			<button type="button" :disabled="disabledNav" :title="$t('capturer')" :aria-label="definirLibelleModule($t('capture'), $t('capturer'))" @click="capturer">
 				<span class="icone"><i class="material-icons" aria-hidden="true">camera</i></span>
 				<span class="titre">{{ $t('capture') }}</span>
@@ -509,6 +513,7 @@ export default {
 			listeVoix: [],
 			modale: '',
 			menu: false,
+			menuFonds: false,
 			nav: true,
 			export: {},
 			panneauxExportes: 0,
@@ -1520,9 +1525,17 @@ export default {
 		},
 		ouvrirMenu () {
 			this.elementPrecedent = (document.activeElement || document.body)
+			this.menuFonds = false
+			this.menu = true
+		},
+		ouvrirMenuFonds () {
+			// Eigener Button „Hintergründe“: Einstellungsmenü nur mit der Hintergrundauswahl
+			this.elementPrecedent = (document.activeElement || document.body)
+			this.menuFonds = true
 			this.menu = true
 		},
 		fermerMenu () {
+			this.menuFonds = false
 			this.menu = false
 			this.gererFocus()
 		},

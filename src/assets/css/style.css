@@ -1642,3 +1642,8 @@ nav .separateur {
 		padding: 0.6rem 11rem 0.6rem 1rem;
 	}
 }
+
+/* Menü nur mit der Hintergrundauswahl (Button „Hintergründe“, Medienzentrum MTK) */
+#menu-parametres.nur-fonds .contenu > *:not(#libelle-parametres-1):not(.fond) {
+	display: none !important;
+}
