@@ -942,12 +942,13 @@ export default {
 			element.classList.add('notification')
 			element.classList.add(notification.type)
 			conteneur?.appendChild(element)
+			const duree = notification.duree || 5000
 			const demarrer = () => {
 				clearTimeout(this.chronos.get(element))
 				this.chronos.set(element, setTimeout(() => {
 					this.chronos.delete(element)
 					element.remove()
-				}, 5000))
+				}, duree))
 			}
 			element.addEventListener('pointerenter', (event) => {
 				if (event.pointerType === 'mouse') clearTimeout(this.chronos.get(element))

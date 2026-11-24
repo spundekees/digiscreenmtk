@@ -326,7 +326,7 @@ export default {
 		modifierFond (fond) {
 			const index = this.app.page - 1
 			this.app.pages[index].fond = fond
-			this.app.notification = { type: 'succes', message: this.$t('arrierePlanModifie') }
+			this.app.notification = { type: 'succes', message: this.$t('arrierePlanModifie'), duree: 1500 }
 		},
 		modifierCouleurFond (event) {
 			this.modifierFond(event.target.value)
