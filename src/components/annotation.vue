@@ -92,7 +92,10 @@
 			</svg>
 		</div>
 
-		<div id="outils-annotation" key="outils">
+		<div id="outils-annotation" key="outils" :style="styleOutils" :class="{'drei-spalten': outilsDreiSpalten, 'verschoben': outilsPosition}">
+			<div class="griff-outils" role="button" tabindex="0" :title="$t('werkzeugleisteVerschieben')" :aria-label="$t('werkzeugleisteVerschieben')" @pointerdown="outilsGesteDebut" @dblclick="outilsPositionReinitialiser" @keydown="outilsClavier">
+				<svg viewBox="0 0 24 8" width="24" height="8" aria-hidden="true"><g fill="#888"><circle cx="6" cy="2" r="1.4" /><circle cx="12" cy="2" r="1.4" /><circle cx="18" cy="2" r="1.4" /><circle cx="6" cy="6.5" r="1.4" /><circle cx="12" cy="6.5" r="1.4" /><circle cx="18" cy="6.5" r="1.4" /></g></svg>
+			</div>
 			<button type="button" class="outil historique" :title="$t('defaire')" :aria-label="$t('defaire')" @click="defaire">
 				<img src="@/assets/img/defaire.png" :alt="$t('defaire')">
 			</button>
@@ -107,16 +110,16 @@
 				<img src="@/assets/img/stylo.png" :alt="$t('dessiner')">
 			</button>
 			<button type="button" id="outil-gomme" class="outil" :title="$t('gomme')" :aria-label="$t('gomme')" :aria-pressed="outilGommer ? 'true' : 'false'" :class="{'actif': outilGommer}" @click="definirOutilPrincipal('gommer')">
-				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g stroke="#000" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M14.5 3.5l6 6-9.5 9.5H6.5l-3-3a1.4 1.4 0 0 1 0-2z" fill="#fff" /><path d="M8.5 9.5l6 6" fill="none" /><path d="M14.5 3.5l6 6-6 6-6-6z" fill="#ff8fa3" /><path d="M11 19h9.5" fill="none" /></g></svg>
+				<svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><g stroke="#000" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M14.5 3.5l6 6-9.5 9.5H6.5l-3-3a1.4 1.4 0 0 1 0-2z" fill="#fff" /><path d="M8.5 9.5l6 6" fill="none" /><path d="M14.5 3.5l6 6-6 6-6-6z" fill="#ff8fa3" /><path d="M11 19h9.5" fill="none" /></g></svg>
 			</button>
 			<button type="button" id="outil-zirkel" class="outil" :title="$t('zirkel')" :aria-label="$t('zirkel')" :aria-pressed="outilZirkel ? 'true' : 'false'" :class="{'actif': outilZirkel}" @click="definirOutilPrincipal('zirkel')">
-				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="1.6" /><path d="M11 5.5L5.5 20M13 5.5l5.5 14.5M7.6 14.5h8.8" /></g></svg>
+				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><g fill="none" stroke="#000" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1.6v2.2" /><circle cx="12" cy="5.8" r="2" /><path d="M10.9 7.6L5.4 19.2" /><path d="M13.1 7.6l4.3 9.4" /><path d="M5.4 19.2l-.6 2.4" stroke-width="1.5" /><path d="M4.2 21.6c4.6 1.9 10.6 1.3 14.8-2.6" stroke="#2e63ae" stroke-width="2" /></g><path d="M16.4 16.2l2.2-1 1.1 4.3-.9.4z" fill="#000" /></svg>
 			</button>
 			<button type="button" id="outil-geodreieck" class="outil" :title="$t('geodreieck')" :aria-label="$t('geodreieck')" :aria-pressed="geoVisible ? 'true' : 'false'" :class="{'actif': geoVisible}" @click="basculerGeodreieck">
-				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g fill="none" stroke="#000" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M2 7h20L12 17z" /><path d="M5 7v2M8 7v1.5M12 7v2.5M16 7v1.5M19 7v2M9.5 11.5a3.5 3.5 0 0 1 5 0" /></g></svg>
+				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><g fill="none" stroke="#000" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M2 7h20L12 17z" /><path d="M5 7v2M8 7v1.5M12 7v2.5M16 7v1.5M19 7v2M9.5 11.5a3.5 3.5 0 0 1 5 0" /></g></svg>
 			</button>
 			<button type="button" id="outil-remplir" class="outil" :title="$t('remplir')" :aria-label="$t('remplir')" :aria-pressed="outilRemplir ? 'true' : 'false'" :class="{'actif': outilRemplir}" @click="definirOutilPrincipal('remplir')">
-				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M16.56 8.94L7.62 0 6.21 1.41l2.38 2.38-5.15 5.15c-.59.59-.59 1.54 0 2.12l5.5 5.5c.29.29.68.44 1.06.44s.77-.15 1.06-.44l5.5-5.5c.59-.58.59-1.53 0-2.12zM5.21 10L10 5.21 14.79 10H5.21zM19 11.5s-2 2.17-2 3.5c0 1.1.9 2 2 2s2-.9 2-2c0-1.33-2-3.5-2-3.5z" /><rect x="2" y="19.5" width="20" height="3.5" rx="1" fill="#f7d000" /></svg>
+				<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M16.56 8.94L7.62 0 6.21 1.41l2.38 2.38-5.15 5.15c-.59.59-.59 1.54 0 2.12l5.5 5.5c.29.29.68.44 1.06.44s.77-.15 1.06-.44l5.5-5.5c.59-.58.59-1.53 0-2.12zM5.21 10L10 5.21 14.79 10H5.21zM19 11.5s-2 2.17-2 3.5c0 1.1.9 2 2 2s2-.9 2-2c0-1.33-2-3.5-2-3.5z" /><rect x="2" y="19.5" width="20" height="3.5" rx="1" fill="#f7d000" /></svg>
 			</button>
 			<button type="button" class="outil" :title="$t('deplacerPanneaux')" :aria-label="$t('deplacerPanneaux')" :aria-pressed="(outilDeplacer) ? 'true' : 'false'" :class="{'actif': outilDeplacer}" @click="definirOutilPrincipal('deplacer')">
 				<img src="@/assets/img/pan.png" :alt="$t('deplacerPanneaux')">
@@ -306,6 +309,7 @@
 <script>
 import zirkel from './annotation/zirkel.js'
 import gomme from './annotation/gomme.js'
+import werkzeugleiste from './annotation/werkzeugleiste.js'
 import geodreieck from './annotation/geodreieck.js'
 import remplir from './annotation/remplir.js'
 import arrierePlan from './annotation/arrierePlan.js'
@@ -318,7 +322,7 @@ const tailleMaxHistorique = 50
 export default {
 	name: 'CAnnotation',
 	inject: ['app'],
-	mixins: [zirkel, geodreieck, remplir, arrierePlan, gomme],
+	mixins: [zirkel, geodreieck, remplir, arrierePlan, gomme, werkzeugleiste],
 	props: {
 		panneaux: { type: Array, required: true },
 		annotations: { type: Object, required: true },
@@ -1694,53 +1698,90 @@ export default {
 }
 
 #outils-annotation {
-	position: absolute;
-	top: 10rem;
-	left: 0;
+	position: fixed;
+	top: 7rem;
+	left: 0.6rem;
 	display: grid;
-    grid-template-rows: repeat(20, auto);
-    background: #fff;
-    padding: 3px 5px;
-    margin: 0;
-    border-top-right-radius: 10px;
-	border-bottom-right-radius: 10px;
+	grid-template-columns: repeat(2, 34px);
+	gap: 3px;
+	align-content: start;
+	background: #fff;
+	padding: 4px 6px 6px;
+	margin: 0;
+	border-radius: 12px;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
 	z-index: 10001;
-	max-height: calc(100% - 9.5rem);
-	overflow-y: auto;
-	overflow-x: hidden;
 	user-select: none;
+}
+
+#outils-annotation.drei-spalten {
+	grid-template-columns: repeat(3, 34px);
+}
+
+#outils-annotation .griff-outils {
+	grid-column: 1 / -1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 16px;
+	border-radius: 6px;
+	cursor: grab;
+	touch-action: none;
+}
+
+#outils-annotation .griff-outils:hover,
+#outils-annotation .griff-outils:focus-visible {
+	background: #eef6f6;
+}
+
+#outils-annotation .griff-outils:active {
+	cursor: grabbing;
 }
 
 #outils-annotation .outil {
 	display: flex;
-    align-items: center;
-    justify-content: center;
-	width: 20px;
-    height: 20px;
-	margin: 5px 0;
-	border-radius: 4px;
-    cursor: pointer;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	margin: 0;
+	padding: 0;
+	border-radius: 7px;
+	cursor: pointer;
+}
+
+#outils-annotation .outil:hover {
+	background: #eef6f6;
 }
 
 #outils-annotation .outil.actif {
-    background: #01ced1;
+	background: #01ced1;
 }
 
 #outils-annotation .outil.historique:active {
-    opacity: 0.7;
+	opacity: 0.7;
 }
 
-#options .option img,
-#outils-annotation .outil img {
+#options .option img {
 	width: auto;
 	height: auto;
 	max-width: 16px;
 	max-height: 16px;
 }
 
+#outils-annotation .outil img {
+	width: auto;
+	height: auto;
+	max-width: 20px;
+	max-height: 20px;
+}
+
 #outils-annotation .separateur {
-    margin: 5px 5px;
-    border: 1px solid #ddd;
+	grid-column: 1 / -1;
+	height: 0;
+	margin: 2px 3px;
+	border: 0;
+	border-top: 1px solid #ddd;
 }
 
 #options {
@@ -1919,7 +1960,7 @@ export default {
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 @media screen and (max-height: 720px) {
 	#outils-annotation {
-		top: 1rem;
+		top: 4.5rem;
 	}
 }
 </style>
