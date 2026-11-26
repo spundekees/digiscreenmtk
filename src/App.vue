@@ -582,9 +582,10 @@ export default {
 			const image = 'url(' + recupererRessource(this.fond) + ')'
 			const e = this.echelleFond
 			// Höhe der Musterkachel in px (Originalgröße)
-			const hauteurs = { 'lineatur-haeuschen.svg': 140, 'lineatur-haeuschen-gross.svg': 224, 'seyes.png': 80, 'quadrillage-grand.png': 60, 'quadrillage-gris-grand.png': 60 }
+			// Muss der tatsächlichen Bildhöhe entsprechen (SVG: height-Attribut), sonst wachsen Zeichnungen nicht passend mit
+			const hauteurs = { 'lineatur-haeuschen.svg': 180, 'lineatur-haeuschen-gross.svg': 288, 'seyes.png': 80, 'quadrillage-grand.png': 60, 'quadrillage-gris-grand.png': 60 }
 			const nom = this.fond.split('/').pop()
-			const taille = e === 1 ? 'auto' : 'auto ' + ((hauteurs[nom] || 30) * e) + 'px'
+			const taille = 'auto ' + ((hauteurs[nom] || 30) * e) + 'px'
 			const d = this.decalageFond
 			const centre = 'calc(50% + ' + d.x + 'px) calc(50% + ' + d.y + 'px)'
 			if (this.fond.substring(0, 1) === '#') {
