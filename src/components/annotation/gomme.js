@@ -32,7 +32,7 @@ export default {
 				event.evt.target.setPointerCapture(event.evt.pointerId)
 			} catch {}
 			// Direkt in der Objekt-Ebene zeichnen, damit sofort sichtbar radiert wird
-			this.traitGomme = new Konva.Line({ points: [position.x, position.y, position.x, position.y], globalCompositeOperation: 'destination-out', stroke: '#000000', strokeWidth: this.epaisseurGomme, lineJoin: 'round', lineCap: 'round', listening: false, perfectDrawEnabled: false })
+			this.traitGomme = new Konva.Line({ points: [position.x, position.y, position.x, position.y], globalCompositeOperation: 'destination-out', tension: 0.5, stroke: '#000000', strokeWidth: this.epaisseurGomme, lineJoin: 'round', lineCap: 'round', listening: false, perfectDrawEnabled: false })
 			const calque = this.$refs.objets.getNode()
 			calque.add(this.traitGomme)
 			calque.batchDraw()
@@ -78,9 +78,9 @@ export default {
 			const ligne = this.traitGomme
 			this.traitGomme = null
 			this.pointeurStylo = null
-			const points = this.reduirePoints(ligne.points(), 1)
+			const points = this.reduirePoints(ligne.points(), 0.5)
 			this.id++
-			this.items.push({ name: 'gomm' + this.id, objet: 'gomme', points: markRaw(points), globalCompositeOperation: 'destination-out', stroke: '#000000', strokeWidth: ligne.strokeWidth(), lineJoin: 'round', lineCap: 'round', listening: false, draggable: false, verrouille: false })
+			this.items.push({ name: 'gomm' + this.id, objet: 'gomme', points: markRaw(points), tension: 0.5, globalCompositeOperation: 'destination-out', stroke: '#000000', strokeWidth: ligne.strokeWidth(), lineJoin: 'round', lineCap: 'round', listening: false, draggable: false, verrouille: false })
 			this.enregistrer()
 			this.$nextTick(() => {
 				const calque = ligne.getLayer()

@@ -1001,7 +1001,7 @@ export default {
 				try {
 					event.evt.target.setPointerCapture(event.evt.pointerId)
 				} catch {}
-				this.traitStylo = new Konva.Line({ points: [position.x, position.y, position.x, position.y], globalCompositeOperation: 'source-over', stroke: this.couleurStylo, strokeWidth: this.epaisseurStylo, opacity: this.transparenceStylo, lineJoin: 'round', lineCap: 'round', listening: false, perfectDrawEnabled: false, shadowForStrokeEnabled: false })
+				this.traitStylo = new Konva.Line({ points: [position.x, position.y, position.x, position.y], tension: this.geoLineal ? 0 : 0.5, globalCompositeOperation: 'source-over', stroke: this.couleurStylo, strokeWidth: this.epaisseurStylo, opacity: this.transparenceStylo, lineJoin: 'round', lineCap: 'round', listening: false, perfectDrawEnabled: false, shadowForStrokeEnabled: false })
 				const calque = this.$refs.calqueStylo.getNode()
 				calque.add(this.traitStylo)
 				calque.batchDraw()
@@ -1143,11 +1143,15 @@ export default {
 			const lineal = this.geoLineal
 			this.geoLineal = null
 			this.geoLongueur = null
-			const points = lineal ? ligne.points().slice(0, 4) : this.reduirePoints(ligne.points(), 1)
+			const points = lineal ? ligne.points().slice(0, 4) : this.reduirePoints(ligne.points(), 0.5)
 			this.traitStylo = null
 			this.pointeurStylo = null
 			this.id++
 			const element = { name: 'dess' + this.id, objet: 'dessin', points: markRaw(points), globalCompositeOperation: 'source-over', stroke: ligne.stroke(), strokeWidth: ligne.strokeWidth(), opacity: ligne.opacity(), hitStrokeWidth: 25, lineJoin: 'round', lineCap: 'round', draggable: false, verrouille: false }
+			if (!lineal) {
+				// Weiche Kurve durch die Abtastpunkte statt eckiger Teilstrecken (Medienzentrum MTK)
+				element.tension = 0.5
+			}
 			if (lineal) {
 				element.droite = true
 				element.geoAussen = { x: -lineal.kante.nx, y: -lineal.kante.ny, d: ligne.strokeWidth() / 2 }
