@@ -1,0 +1,2 @@
+MathJax 3.2.2 (https://www.mathjax.org) – Apache License 2.0
+Unverändert aus dem npm-Paket mathjax@3.2.2 (Ordner es5) übernommen, damit kein externes CDN geladen wird.

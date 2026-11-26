@@ -10,7 +10,7 @@ export default {
 		return {
 			outilsPosition: position,
 			outilsGeste: null,
-			outilsDreiSpalten: false
+			outilsWaagrecht: !!(position && position.waagrecht)
 		}
 	},
 	computed: {
@@ -43,14 +43,19 @@ export default {
 			if (!element) {
 				return
 			}
-			// Passt die Leiste zweispaltig nicht in die Höhe, dreispaltig anordnen
-			this.outilsDreiSpalten = false
-			this.$nextTick(() => {
-				const haut = element.getBoundingClientRect().top
-				if (element.offsetHeight > this.outilsBasLibre() - Math.max(haut, 8) - 8) {
-					this.outilsDreiSpalten = true
+			// Passt die senkrechte Leiste nicht auf den Bildschirm (sehr niedrige Fenster), waagrecht legen
+			if (!this.outilsWaagrecht && element.offsetHeight > this.outilsBasLibre() - 8) {
+				this.outilsWaagrecht = true
+				if (!this.outilsPosition) {
+					this.outilsPosition = { x: 8, y: this.outilsBasLibre() }
 				}
-				this.$nextTick(() => this.outilsBegrenzer(false))
+			}
+			this.$nextTick(() => {
+				// Waagrechte Leiste klebt am unteren Rand
+				if (this.outilsWaagrecht && this.outilsPosition) {
+					this.outilsPosition = { x: this.outilsPosition.x, y: this.outilsBasLibre() - element.offsetHeight }
+				}
+				this.outilsBegrenzer(false)
 			})
 		},
 		outilsBegrenzer (enregistrer) {
@@ -67,7 +72,7 @@ export default {
 			}
 			if (enregistrer) {
 				try {
-					localStorage.setItem(CLE, JSON.stringify(this.outilsPosition))
+					localStorage.setItem(CLE, JSON.stringify({ ...this.outilsPosition, waagrecht: this.outilsWaagrecht }))
 				} catch {}
 			}
 		},
@@ -78,7 +83,7 @@ export default {
 			}
 			event.preventDefault()
 			const rect = element.getBoundingClientRect()
-			this.outilsGeste = { dx: event.clientX - rect.left, dy: event.clientY - rect.top, id: event.pointerId }
+			this.outilsGeste = { dx: event.clientX - rect.left, dy: event.clientY - rect.top, id: event.pointerId, refY: event.clientY }
 			if (!this.outilsPosition) {
 				this.outilsPosition = { x: rect.left, y: rect.top }
 			}
@@ -90,8 +95,59 @@ export default {
 			if (!this.outilsGeste || event.pointerId !== this.outilsGeste.id) {
 				return
 			}
-			this.outilsPosition = { x: event.clientX - this.outilsGeste.dx, y: event.clientY - this.outilsGeste.dy }
+			const element = this.outilsElement()
+			if (!element) {
+				return
+			}
+			const bas = this.outilsBasLibre()
+			const x = event.clientX - this.outilsGeste.dx
+			if (this.outilsWaagrecht) {
+				// Waagrecht: Leiste bleibt am unteren Rand und wandert nur seitlich mit.
+				// Erst wenn der Zeiger deutlich (60 px) nach oben gezogen wird, stellt sie sich wieder auf.
+				this.outilsGeste.refY = Math.max(this.outilsGeste.refY, event.clientY)
+				if (event.clientY < this.outilsGeste.refY - 60) {
+					this.outilsBasculer(false, event)
+					return
+				}
+				this.outilsPosition = { x, y: bas - element.offsetHeight }
+				this.outilsBegrenzer(false)
+				return
+			}
+			const y = event.clientY - this.outilsGeste.dy
+			if (y + element.offsetHeight >= bas - 20) {
+				// Unteren Rand (fast) berührt: Leiste waagrecht in eine Zeile legen
+				this.outilsBasculer(true, event)
+				return
+			}
+			this.outilsPosition = { x, y }
 			this.outilsBegrenzer(false)
+		},
+		outilsBasculer (waagrecht, event) {
+			this.outilsWaagrecht = waagrecht
+			this.$nextTick(() => {
+				const element = this.outilsElement()
+				if (!element || !this.outilsGeste) {
+					return
+				}
+				const griff = element.querySelector('.griff-outils')
+				const rectGriff = griff ? griff.getBoundingClientRect() : null
+				const rect = element.getBoundingClientRect()
+				const bas = this.outilsBasLibre()
+				// Griff bleibt waagrecht unter dem Zeiger
+				this.outilsGeste.dx = rectGriff ? (rectGriff.left - rect.left) + rectGriff.width / 2 : 10
+				let y
+				if (waagrecht) {
+					y = bas - element.offsetHeight
+					this.outilsGeste.dy = rectGriff ? (rectGriff.top - rect.top) + rectGriff.height / 2 : 10
+					this.outilsGeste.refY = event.clientY
+				} else {
+					// Senkrecht mit Abstand zum Rand aufstellen, damit sie nicht sofort wieder umklappt
+					y = Math.max(0, Math.min(event.clientY - 8, bas - element.offsetHeight - 60))
+					this.outilsGeste.dy = event.clientY - y
+				}
+				this.outilsPosition = { x: event.clientX - this.outilsGeste.dx, y }
+				this.outilsBegrenzer(false)
+			})
 		},
 		outilsGesteFin () {
 			window.removeEventListener('pointermove', this.outilsGesteMouvement, false)
@@ -104,6 +160,7 @@ export default {
 		},
 		outilsPositionReinitialiser () {
 			this.outilsPosition = null
+			this.outilsWaagrecht = false
 			try {
 				localStorage.removeItem(CLE)
 			} catch {}

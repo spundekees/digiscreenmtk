@@ -92,7 +92,7 @@
 			</svg>
 		</div>
 
-		<div id="outils-annotation" key="outils" :style="styleOutils" :class="{'drei-spalten': outilsDreiSpalten, 'verschoben': outilsPosition}">
+		<div id="outils-annotation" key="outils" :style="styleOutils" :class="{'waagrecht': outilsWaagrecht, 'verschoben': outilsPosition}">
 			<div class="griff-outils" role="button" tabindex="0" :title="$t('werkzeugleisteVerschieben')" :aria-label="$t('werkzeugleisteVerschieben')" @pointerdown="outilsGesteDebut" @dblclick="outilsPositionReinitialiser" @keydown="outilsClavier">
 				<svg viewBox="0 0 24 8" width="24" height="8" aria-hidden="true"><g fill="#888"><circle cx="6" cy="2" r="1.4" /><circle cx="12" cy="2" r="1.4" /><circle cx="18" cy="2" r="1.4" /><circle cx="6" cy="6.5" r="1.4" /><circle cx="12" cy="6.5" r="1.4" /><circle cx="18" cy="6.5" r="1.4" /></g></svg>
 			</div>
@@ -1714,8 +1714,33 @@ export default {
 	user-select: none;
 }
 
-#outils-annotation.drei-spalten {
-	grid-template-columns: repeat(3, 34px);
+#outils-annotation.waagrecht {
+	grid-template-columns: none;
+	grid-template-rows: 34px;
+	grid-auto-flow: column;
+	grid-auto-columns: max-content;
+	padding: 5px 6px;
+	max-width: 100vw;
+	overflow-x: auto;
+}
+
+#outils-annotation.waagrecht .griff-outils {
+	grid-column: auto;
+	width: 16px;
+	height: 34px;
+}
+
+#outils-annotation.waagrecht .griff-outils svg {
+	transform: rotate(90deg);
+}
+
+#outils-annotation.waagrecht .separateur {
+	grid-column: auto;
+	width: 0;
+	height: auto;
+	margin: 3px 2px;
+	border-top: 0;
+	border-left: 1px solid #ddd;
 }
 
 #outils-annotation .griff-outils {
