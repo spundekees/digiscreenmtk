@@ -1704,11 +1704,16 @@ export default {
 			}
 			this.importTermine = true
 			if (page === this.page) {
-				if (this.pages[this.page - 1].annotation === false) {
-					this.annotation = false
-				} else {
-					this.annotation = true
-				}
+				// Annotation neu aufbauen, sonst zeigt die offene Zeichenfläche noch die alten Striche
+				// und überschreibt beim nächsten Strich die geladenen (Medienzentrum MTK)
+				const avecAnnotation = this.pages[this.page - 1].annotation !== false
+				this.annotation = false
+				this.$nextTick(() => {
+					if (avecAnnotation) {
+						this.annotation = true
+					}
+					this.annotationAuto()
+				})
 				this.retroaction = false
 				this.modalites = false
 				this.panneauxPage.forEach((panneau) => {

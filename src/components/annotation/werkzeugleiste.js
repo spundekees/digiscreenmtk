@@ -18,6 +18,12 @@ export default {
 			return this.outilsPosition ? { left: this.outilsPosition.x + 'px', top: this.outilsPosition.y + 'px' } : {}
 		}
 	},
+	watch: {
+		nav () {
+			// Programmleiste ein-/ausgeblendet: waagrechte Werkzeugleiste fährt mit nach unten bzw. oben
+			this.$nextTick(this.outilsAjuster)
+		}
+	},
 	mounted () {
 		window.addEventListener('resize', this.outilsAjuster, false)
 		this.$nextTick(this.outilsAjuster)
@@ -31,10 +37,11 @@ export default {
 			return document.querySelector('#outils-annotation')
 		},
 		outilsBasLibre () {
-			// Unterkante des freien Bereichs: Oberkante der Programmleiste (falls sichtbar)
+			// Unterkante des freien Bereichs: Oberkante der Programmleiste, wenn sie eingeblendet ist.
+			// Aus der Höhe der Leiste berechnet (nicht aus ihrer Lage), damit es auch während der Ein-/Ausblend-Animation stimmt.
 			const nav = document.querySelector('nav')
-			if (nav && !nav.classList.contains('masque')) {
-				return Math.min(window.innerHeight, nav.getBoundingClientRect().top)
+			if (this.nav && nav) {
+				return window.innerHeight - nav.offsetHeight
 			}
 			return window.innerHeight
 		},

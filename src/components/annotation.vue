@@ -92,7 +92,7 @@
 			</svg>
 		</div>
 
-		<div id="outils-annotation" key="outils" :style="styleOutils" :class="{'waagrecht': outilsWaagrecht, 'verschoben': outilsPosition}">
+		<div id="outils-annotation" key="outils" :style="styleOutils" :class="{'waagrecht': outilsWaagrecht, 'verschoben': outilsPosition, 'ziehen': outilsGeste}">
 			<div class="griff-outils" role="button" tabindex="0" :title="$t('werkzeugleisteVerschieben')" :aria-label="$t('werkzeugleisteVerschieben')" @pointerdown="outilsGesteDebut" @dblclick="outilsPositionReinitialiser" @keydown="outilsClavier">
 				<svg viewBox="0 0 24 8" width="24" height="8" aria-hidden="true"><g fill="#888"><circle cx="6" cy="2" r="1.4" /><circle cx="12" cy="2" r="1.4" /><circle cx="18" cy="2" r="1.4" /><circle cx="6" cy="6.5" r="1.4" /><circle cx="12" cy="6.5" r="1.4" /><circle cx="18" cy="6.5" r="1.4" /></g></svg>
 			</div>
@@ -1721,6 +1721,10 @@ export default {
 	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
 	z-index: 10001;
 	user-select: none;
+}
+
+#outils-annotation.waagrecht:not(.ziehen) {
+	transition: top 0.2s ease-in-out;
 }
 
 #outils-annotation.waagrecht {

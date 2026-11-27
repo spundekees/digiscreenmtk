@@ -51,6 +51,21 @@ export default {
 			rappelMasqueJusqua: 0
 		}
 	},
+	watch: {
+		// Jede Änderung (Zeichnung, Seite, Panel) kurz danach sichern – nicht erst nach 30 Sekunden
+		pages: {
+			handler () {
+				this.planifierSauvegarde()
+			},
+			deep: true
+		},
+		panneaux: {
+			handler () {
+				this.planifierSauvegarde()
+			},
+			deep: true
+		}
+	},
 	computed: {
 		dateSauvegardeTrouvee () {
 			if (!this.sauvegardeTrouvee) {
@@ -66,6 +81,7 @@ export default {
 	},
 	beforeUnmount () {
 		clearInterval(this.intervalleSauvegarde)
+		clearTimeout(this.minuterieSauvegarde)
 		document.removeEventListener('visibilitychange', this.sauvegarderSiCache, false)
 		window.removeEventListener('pagehide', this.sauvegarderImmediat, false)
 	},
@@ -111,6 +127,13 @@ export default {
 					this.panneauxExportes = 0
 				}
 			}, 5000)
+		},
+		planifierSauvegarde () {
+			if (this.lectureSeule || this.chargement || this.importDonnees || this.sauvegardeTrouvee) {
+				return
+			}
+			clearTimeout(this.minuterieSauvegarde)
+			this.minuterieSauvegarde = setTimeout(this.sauvegarderImmediat, 800)
 		},
 		sauvegarderSiCache () {
 			if (document.hidden) {
