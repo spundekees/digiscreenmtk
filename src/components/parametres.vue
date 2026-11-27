@@ -162,7 +162,7 @@
 							</label>
 						</div>
 						<div class="module" v-for="module in modulesFiltres" :key="module.valeur">
-							<span>{{ definirLibelleModule(module) }}</span>
+							<span class="nom-module">{{ definirLibelleModule(module) }}<small class="info-module">{{ $t('info_' + module.valeur.replace(/-/g, '_')) }}</small></span>
 							<label class="interrupteur">
 								<input :id="module.id" type="checkbox" role="switch" :aria-label="definirLibelleModule(module)" :value="module.valeur" :checked="app.modules.includes(module.valeur)" @change="modifierModule">
 								<span class="curseur" />
@@ -170,6 +170,20 @@
 						</div>
 						<p class="aucun-module" role="status">{{ messageModules }}</p>
 					</div>
+
+					<label id="libelle-ordre-modules">{{ $t('ordreModules') }}</label>
+					<p class="aide-ordre-modules">{{ $t('ordreModulesAide') }}</p>
+					<div class="ordre-modules" role="list" aria-labelledby="libelle-ordre-modules">
+						<draggable :list="app.modules" handle=".poignee" @end="app.enregistrerOrdreModules()">
+							<div class="module-ordre" role="listitem" v-for="(valeur, index) in app.modules" :key="valeur">
+								<span class="poignee" aria-hidden="true"><i class="material-icons">drag_indicator</i></span>
+								<span class="nom">{{ libelleModuleValeur(valeur) }}</span>
+								<button type="button" :title="$t('deplacerAvant')" :aria-label="$t('deplacerAvant') + ': ' + libelleModuleValeur(valeur)" :disabled="index === 0" @click="app.deplacerModule(valeur, index - 1)"><i class="material-icons" aria-hidden="true">arrow_upward</i></button>
+								<button type="button" :title="$t('deplacerApres')" :aria-label="$t('deplacerApres') + ': ' + libelleModuleValeur(valeur)" :disabled="index === app.modules.length - 1" @click="app.deplacerModule(valeur, index + 1)"><i class="material-icons" aria-hidden="true">arrow_downward</i></button>
+							</div>
+						</draggable>
+					</div>
+					<button type="button" class="bouton" @click="app.reinitialiserOrdreModules()">{{ $t('ordreModulesStandard') }}</button>
 				</div>
 			</div>
 		</div>
@@ -628,6 +642,10 @@ export default {
 		definirLibelleModule (module) {
 			return module.cle ? this.$t(module.cle) : module.texte
 		},
+		libelleModuleValeur (valeur) {
+			const module = listeModules.find(m => m.valeur === valeur)
+			return module ? this.definirLibelleModule(module) : valeur
+		},
 		gererEchapRechercheModules (event) {
 			if (this.filtreModules !== '') {
 				event.stopPropagation()
@@ -941,6 +959,62 @@ export default {
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 2rem;
+}
+
+.menu .modules .module .nom-module {
+	display: flex;
+	flex-direction: column;
+	padding-right: 1rem;
+}
+
+.menu .modules .module .info-module {
+	margin-top: 0.2rem;
+	font-size: 1.25rem;
+	line-height: 1.3;
+	color: #5a6b6b;
+}
+
+.menu .aide-ordre-modules {
+	margin: -0.5rem 0 1rem;
+	font-size: 1.3rem;
+	color: #5a6b6b;
+}
+
+.menu .ordre-modules {
+	margin-bottom: 1.5rem;
+}
+
+.menu .ordre-modules .module-ordre {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.4rem 0.6rem;
+	margin-bottom: 0.4rem;
+	background: #f3f6f6;
+	border-radius: 0.6rem;
+}
+
+.menu .ordre-modules .module-ordre .poignee {
+	cursor: grab;
+	color: #7a8a8a;
+	touch-action: none;
+}
+
+.menu .ordre-modules .module-ordre .nom {
+	flex: 1;
+}
+
+.menu .ordre-modules .module-ordre button {
+	display: inline-flex;
+	padding: 0.2rem;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+}
+
+.menu .ordre-modules .module-ordre button:disabled {
+	opacity: 0.3;
+	cursor: default;
 }
 
 .menu .modules .module .interrupteur {

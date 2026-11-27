@@ -1710,3 +1710,25 @@ nav .logo-nav {
 	box-shadow: 0 2px 14px rgba(0, 0, 0, 0.22);
 	font-size: 1.5rem;
 }
+
+/* Modul-Knöpfe in der Leiste sortieren (Medienzentrum MTK) */
+nav button[data-module] {
+	touch-action: none;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+nav button.module-ziehen {
+	z-index: 2;
+	transform: scale(1.12);
+	opacity: 0.95;
+	outline: 3px dashed #00ced1;
+	outline-offset: 2px;
+	border-radius: 0.6rem;
+	cursor: grabbing;
+}
+
+nav.modules-sortieren button[data-module]:not(.module-ziehen) {
+	opacity: 0.75;
+}

@@ -99,203 +99,203 @@
 		</div>
 
 		<nav v-if="!alerte" :class="{'masque': !nav}" :data-html2canvas-ignore="true" :inert="!nav || null">
-			<button type="button" :disabled="disabledNav" :title="$t('codeqr')" :aria-label="$t('codeqr')" @click="creerPanneau('codeqr')" v-if="modules.includes('codeqr')">
+			<button data-module="codeqr" type="button" :disabled="disabledNav" :title="$t('codeqr')" :aria-label="$t('codeqr')" @click="creerPanneau('codeqr')" v-if="modules.includes('codeqr')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">qr_code</i></span>
 				<span class="titre">{{ $t('codeqr') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('texte')" :aria-label="$t('texte')" @click="creerPanneau('texte')" v-if="modules.includes('texte')">
+			<button data-module="texte" type="button" :disabled="disabledNav" :title="$t('texte')" :aria-label="$t('texte')" @click="creerPanneau('texte')" v-if="modules.includes('texte')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">title</i></span>
 				<span class="titre">{{ $t('texte') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" title="Seyes" aria-label="Seyes" @click="creerPanneau('seyes')" v-if="modules.includes('seyes')">
+			<button data-module="seyes" type="button" :disabled="disabledNav" title="Seyes" aria-label="Seyes" @click="creerPanneau('seyes')" v-if="modules.includes('seyes')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">grid_on</i></span>
 				<span class="titre">Seyes</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('tableau')" :aria-label="$t('tableau')" @click="creerPanneau('tableau')" v-if="modules.includes('tableau')">
+			<button data-module="tableau" type="button" :disabled="disabledNav" :title="$t('tableau')" :aria-label="$t('tableau')" @click="creerPanneau('tableau')" v-if="modules.includes('tableau')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">table_chart</i></span>
 				<span class="titre">{{ $t('tableau') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('image')" :aria-label="$t('image')" @click="creerPanneau('image')" v-if="modules.includes('image')">
+			<button data-module="image" type="button" :disabled="disabledNav" :title="$t('image')" :aria-label="$t('image')" @click="creerPanneau('image')" v-if="modules.includes('image')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">insert_photo</i></span>
 				<span class="titre">{{ $t('image') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('galerieImages')" :aria-label="definirLibelleModule($t('galerie'), $t('galerieImages'))" @click="creerPanneau('galerie')" v-if="modules.includes('galerie')">
+			<button data-module="galerie" type="button" :disabled="disabledNav" :title="$t('galerieImages')" :aria-label="definirLibelleModule($t('galerie'), $t('galerieImages'))" @click="creerPanneau('galerie')" v-if="modules.includes('galerie')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">view_carousel</i></span>
 				<span class="titre">{{ $t('galerie') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('dessin')" :aria-label="$t('dessin')" @click="creerPanneau('dessin')" v-if="modules.includes('dessin')">
+			<button data-module="dessin" type="button" :disabled="disabledNav" :title="$t('dessin')" :aria-label="$t('dessin')" @click="creerPanneau('dessin')" v-if="modules.includes('dessin')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">gesture</i></span>
 				<span class="titre">{{ $t('dessin') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('document')" :aria-label="$t('document')" @click="creerPanneau('document')" v-if="modules.includes('document')">
+			<button data-module="document" type="button" :disabled="disabledNav" :title="$t('document')" :aria-label="$t('document')" @click="creerPanneau('document')" v-if="modules.includes('document')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">description</i></span>
 				<span class="titre">{{ $t('document') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('audio')" :aria-label="$t('audio')" @click="creerPanneau('audio')" v-if="modules.includes('audio')">
+			<button data-module="audio" type="button" :disabled="disabledNav" :title="$t('audio')" :aria-label="$t('audio')" @click="creerPanneau('audio')" v-if="modules.includes('audio')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">volume_up</i></span>
 				<span class="titre">{{ $t('audio') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('enregistrementAudio')" :aria-label="definirLibelleModule($t('enregistrement'), $t('enregistrementAudio'))" @click="creerPanneau('enregistrement')" v-if="modules.includes('enregistrement')">
+			<button data-module="enregistrement" type="button" :disabled="disabledNav" :title="$t('enregistrementAudio')" :aria-label="definirLibelleModule($t('enregistrement'), $t('enregistrementAudio'))" @click="creerPanneau('enregistrement')" v-if="modules.includes('enregistrement')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">fiber_manual_record</i></span>
 				<span class="titre">{{ $t('enregistrement') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('syntheseVocale')" :aria-label="definirLibelleModule($t('synthese'), $t('syntheseVocale'))" @click="creerPanneau('synthese')" v-if="modules.includes('synthese')">
+			<button data-module="synthese" type="button" :disabled="disabledNav" :title="$t('syntheseVocale')" :aria-label="definirLibelleModule($t('synthese'), $t('syntheseVocale'))" @click="creerPanneau('synthese')" v-if="modules.includes('synthese')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">record_voice_over</i></span>
 				<span class="titre">{{ $t('synthese') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('video')" :aria-label="$t('video')" @click="creerPanneau('video')" v-if="modules.includes('video')">
+			<button data-module="video" type="button" :disabled="disabledNav" :title="$t('video')" :aria-label="$t('video')" @click="creerPanneau('video')" v-if="modules.includes('video')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">movie_creation</i></span>
 				<span class="titre">{{ $t('video') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('webcam')" :aria-label="$t('webcam')" @click="creerPanneau('webcam')" v-if="modules.includes('webcam')">
+			<button data-module="webcam" type="button" :disabled="disabledNav" :title="$t('webcam')" :aria-label="$t('webcam')" @click="creerPanneau('webcam')" v-if="modules.includes('webcam')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">photo_camera</i></span>
 				<span class="titre">{{ $t('webcam') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('partageEcran')" :aria-label="definirLibelleModule($t('partage'), $t('partageEcran'))" @click="creerPanneau('partage-ecran')" v-if="modules.includes('partage-ecran')">
+			<button data-module="partage-ecran" type="button" :disabled="disabledNav" :title="$t('partageEcran')" :aria-label="definirLibelleModule($t('partage'), $t('partageEcran'))" @click="creerPanneau('partage-ecran')" v-if="modules.includes('partage-ecran')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">screen_share</i></span>
 				<span class="titre">{{ $t('partage') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('lien')" :aria-label="$t('lien')" @click="creerPanneau('lien')" v-if="modules.includes('lien')">
+			<button data-module="lien" type="button" :disabled="disabledNav" :title="$t('lien')" :aria-label="$t('lien')" @click="creerPanneau('lien')" v-if="modules.includes('lien')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">link</i></span>
 				<span class="titre">{{ $t('lien') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('contenuIntegre')" :aria-label="definirLibelleModule($t('iframe'), $t('contenuIntegre'))" @click="creerPanneau('iframe')" v-if="modules.includes('iframe')">
+			<button data-module="iframe" type="button" :disabled="disabledNav" :title="$t('contenuIntegre')" :aria-label="definirLibelleModule($t('iframe'), $t('contenuIntegre'))" @click="creerPanneau('iframe')" v-if="modules.includes('iframe')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">code</i></span>
 				<span class="titre">{{ $t('iframe') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('html')" :aria-label="$t('html')" @click="creerPanneau('html')" v-if="modules.includes('html')">
+			<button data-module="html" type="button" :disabled="disabledNav" :title="$t('html')" :aria-label="$t('html')" @click="creerPanneau('html')" v-if="modules.includes('html')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">html</i></span>
 				<span class="titre">{{ $t('html') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('liste')" :aria-label="$t('liste')" @click="creerPanneau('liste')" v-if="modules.includes('liste')">
+			<button data-module="liste" type="button" :disabled="disabledNav" :title="$t('liste')" :aria-label="$t('liste')" @click="creerPanneau('liste')" v-if="modules.includes('liste')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">checklist</i></span>
 				<span class="titre">{{ $t('liste') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('nuageMots')" :aria-label="definirLibelleModule($t('nuage'), $t('nuageMots'))" @click="creerPanneau('nuage')" v-if="modules.includes('nuage')">
+			<button data-module="nuage" type="button" :disabled="disabledNav" :title="$t('nuageMots')" :aria-label="definirLibelleModule($t('nuage'), $t('nuageMots'))" @click="creerPanneau('nuage')" v-if="modules.includes('nuage')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">cloud</i></span>
 				<span class="titre">{{ $t('nuage') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('remiseOrdre')" :aria-label="definirLibelleModule($t('ordre'), $t('remiseOrdre'))" @click="creerPanneau('ordre')" v-if="modules.includes('ordre')">
+			<button data-module="ordre" type="button" :disabled="disabledNav" :title="$t('remiseOrdre')" :aria-label="definirLibelleModule($t('ordre'), $t('remiseOrdre'))" @click="creerPanneau('ordre')" v-if="modules.includes('ordre')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">sort_by_alpha</i></span>
 				<span class="titre">{{ $t('ordre') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('imagesSequentielles')" :aria-label="definirLibelleModule($t('ordreImage'), $t('imagesSequentielles'))" @click="creerPanneau('images-sequentielles')" v-if="modules.includes('images-sequentielles')">
+			<button data-module="images-sequentielles" type="button" :disabled="disabledNav" :title="$t('imagesSequentielles')" :aria-label="definirLibelleModule($t('ordreImage'), $t('imagesSequentielles'))" @click="creerPanneau('images-sequentielles')" v-if="modules.includes('images-sequentielles')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">category</i></span>
 				<span class="titre">{{ $t('ordreImage') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('texteATrous')" :aria-label="definirLibelleModule($t('trous'), $t('texteATrous'))" @click="creerPanneau('trous')" v-if="modules.includes('trous')">
+			<button data-module="trous" type="button" :disabled="disabledNav" :title="$t('texteATrous')" :aria-label="definirLibelleModule($t('trous'), $t('texteATrous'))" @click="creerPanneau('trous')" v-if="modules.includes('trous')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">wysiwyg</i></span>
 				<span class="titre">{{ $t('trous') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('surlignage')" :aria-label="$t('surlignage')" @click="creerPanneau('surlignage')" v-if="modules.includes('surlignage')">
+			<button data-module="surlignage" type="button" :disabled="disabledNav" :title="$t('surlignage')" :aria-label="$t('surlignage')" @click="creerPanneau('surlignage')" v-if="modules.includes('surlignage')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">hdr_strong</i></span>
 				<span class="titre">{{ $t('surlignage') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('motMystere')" :aria-label="$t('motMystere')" @click="creerPanneau('mot-mystere')" v-if="modules.includes('mot-mystere')">
+			<button data-module="mot-mystere" type="button" :disabled="disabledNav" :title="$t('motMystere')" :aria-label="$t('motMystere')" @click="creerPanneau('mot-mystere')" v-if="modules.includes('mot-mystere')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">spellcheck</i></span>
 				<span class="titre">{{ $t('motMystere') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('cartes')" :aria-label="$t('cartes')" @click="creerPanneau('cartes')" v-if="modules.includes('cartes')">
+			<button data-module="cartes" type="button" :disabled="disabledNav" :title="$t('cartes')" :aria-label="$t('cartes')" @click="creerPanneau('cartes')" v-if="modules.includes('cartes')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">style</i></span>
 				<span class="titre">{{ $t('cartes') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('appariement')" :aria-label="$t('appariement')" @click="creerPanneau('appariement')" v-if="modules.includes('appariement')">
+			<button data-module="appariement" type="button" :disabled="disabledNav" :title="$t('appariement')" :aria-label="$t('appariement')" @click="creerPanneau('appariement')" v-if="modules.includes('appariement')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">compare_arrows</i></span>
 				<span class="titre">{{ $t('appariement') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('categories')" :aria-label="$t('categories')" @click="creerPanneau('categories')" v-if="modules.includes('categories')">
+			<button data-module="categories" type="button" :disabled="disabledNav" :title="$t('categories')" :aria-label="$t('categories')" @click="creerPanneau('categories')" v-if="modules.includes('categories')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">view_week</i></span>
 				<span class="titre">{{ $t('categories') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('tirageSortTexte')" :aria-label="definirLibelleModule($t('tirageTexte'), $t('tirageSortTexte'))" @click="creerPanneau('tirage-texte')" v-if="modules.includes('tirage-texte')">
+			<button data-module="tirage-texte" type="button" :disabled="disabledNav" :title="$t('tirageSortTexte')" :aria-label="definirLibelleModule($t('tirageTexte'), $t('tirageSortTexte'))" @click="creerPanneau('tirage-texte')" v-if="modules.includes('tirage-texte')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">shuffle</i></span>
 				<span class="titre">{{ $t('tirageTexte') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('tirageSortNombre')" :aria-label="definirLibelleModule($t('tirageNombre'), $t('tirageSortNombre'))" @click="creerPanneau('tirage-nombre')" v-if="modules.includes('tirage-nombre')">
+			<button data-module="tirage-nombre" type="button" :disabled="disabledNav" :title="$t('tirageSortNombre')" :aria-label="definirLibelleModule($t('tirageNombre'), $t('tirageSortNombre'))" @click="creerPanneau('tirage-nombre')" v-if="modules.includes('tirage-nombre')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">123</i></span>
 				<span class="titre">{{ $t('tirageNombre') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('tirageSortImage')" :aria-label="definirLibelleModule($t('tirageImage'), $t('tirageSortImage'))" @click="creerPanneau('tirage-image')" v-if="modules.includes('tirage-image')">
+			<button data-module="tirage-image" type="button" :disabled="disabledNav" :title="$t('tirageSortImage')" :aria-label="definirLibelleModule($t('tirageImage'), $t('tirageSortImage'))" @click="creerPanneau('tirage-image')" v-if="modules.includes('tirage-image')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">collections</i></span>
 				<span class="titre">{{ $t('tirageImage') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('tirageSortAudio')" :aria-label="definirLibelleModule($t('tirageAudio'), $t('tirageSortAudio'))" @click="creerPanneau('tirage-audio')" v-if="modules.includes('tirage-audio')">
+			<button data-module="tirage-audio" type="button" :disabled="disabledNav" :title="$t('tirageSortAudio')" :aria-label="definirLibelleModule($t('tirageAudio'), $t('tirageSortAudio'))" @click="creerPanneau('tirage-audio')" v-if="modules.includes('tirage-audio')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">subscriptions</i></span>
 				<span class="titre">{{ $t('tirageAudio') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('roue')" :aria-label="$t('roue')" @click="creerPanneau('roue')" v-if="modules.includes('roue')">
+			<button data-module="roue" type="button" :disabled="disabledNav" :title="$t('roue')" :aria-label="$t('roue')" @click="creerPanneau('roue')" v-if="modules.includes('roue')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">pending</i></span>
 				<span class="titre">{{ $t('roue') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('histoire')" :aria-label="$t('histoire')" @click="creerPanneau('histoire')" v-if="modules.includes('histoire')">
+			<button data-module="histoire" type="button" :disabled="disabledNav" :title="$t('histoire')" :aria-label="$t('histoire')" @click="creerPanneau('histoire')" v-if="modules.includes('histoire')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">history_edu</i></span>
 				<span class="titre">{{ $t('histoire') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('plateau')" :aria-label="$t('plateau')" @click="creerPanneau('plateau')" v-if="modules.includes('plateau')">
+			<button data-module="plateau" type="button" :disabled="disabledNav" :title="$t('plateau')" :aria-label="$t('plateau')" @click="creerPanneau('plateau')" v-if="modules.includes('plateau')">
 				<span class="icone" style="font-size: 0"><svg xmlns="http://www.w3.org/2000/svg" width="2.4rem"  height="2.4rem" viewBox="0 -960 960 960" fill="#000" aria-hidden="true"><path d="M160-80v-200q88-60 129-125t56-115H240v-80h90q-14-22-22-47t-8-53q0-75 52.5-127.5T480-880q75 0 127.5 52.5T660-700q0 28-8 53t-22 47h90v80H615q15 50 56 115t129 125v200H160Zm80-80h480v-80q-92-72-133-148.5T532-520H428q-14 55-55 131.5T240-240v80Zm240-440q42 0 71-29t29-71q0-42-29-71t-71-29q-42 0-71 29t-29 71q0 42 29 71t71 29Zm0 440Zm0-540Z"/></svg></span>
 				<span class="titre">{{ $t('plateau') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('des')" :aria-label="$t('des')" @click="creerPanneau('des')" v-if="modules.includes('des')">
+			<button data-module="des" type="button" :disabled="disabledNav" :title="$t('des')" :aria-label="$t('des')" @click="creerPanneau('des')" v-if="modules.includes('des')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">casino</i></span>
 				<span class="titre">{{ $t('des') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('classement')" :aria-label="$t('classement')" @click="creerPanneau('classement')" v-if="modules.includes('classement')">
+			<button data-module="classement" type="button" :disabled="disabledNav" :title="$t('classement')" :aria-label="$t('classement')" @click="creerPanneau('classement')" v-if="modules.includes('classement')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">emoji_events</i></span>
 				<span class="titre">{{ $t('classement') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('feuQuadricolore')" :aria-label="definirLibelleModule($t('feu'), $t('feuQuadricolore'))" @click="creerPanneau('feu')" v-if="modules.includes('feu')">
+			<button data-module="feu" type="button" :disabled="disabledNav" :title="$t('feuQuadricolore')" :aria-label="definirLibelleModule($t('feu'), $t('feuQuadricolore'))" @click="creerPanneau('feu')" v-if="modules.includes('feu')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">traffic</i></span>
 				<span class="titre">{{ $t('feu') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('modalitesTravail')" :aria-label="definirLibelleModule($t('modalites'), $t('modalitesTravail'))" @click="creerPanneau('modalites')" v-if="modules.includes('modalites')" :class="{'actif': modalites}">
+			<button data-module="modalites" type="button" :disabled="disabledNav" :title="$t('modalitesTravail')" :aria-label="definirLibelleModule($t('modalites'), $t('modalitesTravail'))" @click="creerPanneau('modalites')" v-if="modules.includes('modalites')" :class="{'actif': modalites}">
 				<span class="icone"><i class="material-icons" aria-hidden="true">group_work</i></span>
 				<span class="titre">{{ $t('modalites') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('groupes')" :aria-label="$t('groupes')" @click="creerPanneau('groupes')" v-if="modules.includes('groupes')">
+			<button data-module="groupes" type="button" :disabled="disabledNav" :title="$t('groupes')" :aria-label="$t('groupes')" @click="creerPanneau('groupes')" v-if="modules.includes('groupes')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">group</i></span>
 				<span class="titre">{{ $t('groupes') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('meteoHumeur')" :aria-label="definirLibelleModule($t('humeur'), $t('meteoHumeur'))" @click="creerPanneau('humeur')" v-if="modules.includes('humeur')">
+			<button data-module="humeur" type="button" :disabled="disabledNav" :title="$t('meteoHumeur')" :aria-label="definirLibelleModule($t('humeur'), $t('meteoHumeur'))" @click="creerPanneau('humeur')" v-if="modules.includes('humeur')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">mood</i></span>
 				<span class="titre">{{ $t('humeur') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('chronometre')" :aria-label="definirLibelleModule($t('chrono'), $t('chronometre'))" @click="creerPanneau('chrono')" v-if="modules.includes('chrono')">
+			<button data-module="chrono" type="button" :disabled="disabledNav" :title="$t('chronometre')" :aria-label="definirLibelleModule($t('chrono'), $t('chronometre'))" @click="creerPanneau('chrono')" v-if="modules.includes('chrono')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">timer</i></span>
 				<span class="titre">{{ $t('chrono') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('compteRebours')" :aria-label="definirLibelleModule($t('rebours'), $t('compteRebours'))" @click="creerPanneau('rebours')" v-if="modules.includes('rebours')">
+			<button data-module="rebours" type="button" :disabled="disabledNav" :title="$t('compteRebours')" :aria-label="definirLibelleModule($t('rebours'), $t('compteRebours'))" @click="creerPanneau('rebours')" v-if="modules.includes('rebours')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">timelapse</i></span>
 				<span class="titre">{{ $t('rebours') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('sablier')" :aria-label="$t('sablier')" @click="creerPanneau('sablier')" v-if="modules.includes('sablier')">
+			<button data-module="sablier" type="button" :disabled="disabledNav" :title="$t('sablier')" :aria-label="$t('sablier')" @click="creerPanneau('sablier')" v-if="modules.includes('sablier')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">hourglass_empty</i></span>
 				<span class="titre">{{ $t('sablier') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('horlogeModulable')" :aria-label="definirLibelleModule($t('horlogeM'), $t('horlogeModulable'))" @click="creerPanneau('horloge-modulable')" v-if="modules.includes('horloge-modulable')">
+			<button data-module="horloge-modulable" type="button" :disabled="disabledNav" :title="$t('horlogeModulable')" :aria-label="definirLibelleModule($t('horlogeM'), $t('horlogeModulable'))" @click="creerPanneau('horloge-modulable')" v-if="modules.includes('horloge-modulable')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">update</i></span>
 				<span class="titre">{{ $t('horlogeM') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('horloge')" :aria-label="$t('horloge')" @click="creerPanneau('horloge')" v-if="modules.includes('horloge')">
+			<button data-module="horloge" type="button" :disabled="disabledNav" :title="$t('horloge')" :aria-label="$t('horloge')" @click="creerPanneau('horloge')" v-if="modules.includes('horloge')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">query_builder</i></span>
 				<span class="titre">{{ $t('horloge') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('calendrier')" :aria-label="$t('calendrier')" @click="creerPanneau('calendrier')" v-if="modules.includes('calendrier')">
+			<button data-module="calendrier" type="button" :disabled="disabledNav" :title="$t('calendrier')" :aria-label="$t('calendrier')" @click="creerPanneau('calendrier')" v-if="modules.includes('calendrier')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">today</i></span>
 				<span class="titre">{{ $t('calendrier') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('sonometre')" :aria-label="$t('sonometre')" @click="creerPanneau('sonometre')" v-if="modules.includes('sonometre')">
+			<button data-module="sonometre" type="button" :disabled="disabledNav" :title="$t('sonometre')" :aria-label="$t('sonometre')" @click="creerPanneau('sonometre')" v-if="modules.includes('sonometre')">
 				<span class="icone"><i class="material-icons" aria-hidden="true">hearing</i></span>
 				<span class="titre">{{ $t('sonometre') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('retroaction')" :aria-label="$t('retroaction')" @click="creerPanneau('retroaction')" v-if="modules.includes('retroaction')" :class="{'actif': retroaction}">
+			<button data-module="retroaction" type="button" :disabled="disabledNav" :title="$t('retroaction')" :aria-label="$t('retroaction')" @click="creerPanneau('retroaction')" v-if="modules.includes('retroaction')" :class="{'actif': retroaction}">
 				<span class="icone"><i class="material-icons" aria-hidden="true">thumb_up</i></span>
 				<span class="titre">{{ $t('retroaction') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('grille')" :aria-label="$t('grille')" @click="ouvrirModale('grille')" v-if="modules.includes('grille') && Object.keys(grille).length === 0">
+			<button data-module="grille" type="button" :disabled="disabledNav" :title="$t('grille')" :aria-label="$t('grille')" @click="ouvrirModale('grille')" v-if="modules.includes('grille') && Object.keys(grille).length === 0">
 				<span class="icone"><i class="material-icons" aria-hidden="true">view_module</i></span>
 				<span class="titre">{{ $t('grille') }}</span>
 			</button>
-			<button type="button" :disabled="disabledNav" :title="$t('grille')" :aria-label="$t('grille')" @click="reinitialiserGrille" class="actif" v-else-if="modules.includes('grille') && Object.keys(grille).length > 0">
+			<button data-module="grille" type="button" :disabled="disabledNav" :title="$t('grille')" :aria-label="$t('grille')" @click="reinitialiserGrille" class="actif" v-else-if="modules.includes('grille') && Object.keys(grille).length > 0">
 				<span class="icone"><i class="material-icons" aria-hidden="true">view_module</i></span>
 				<span class="titre">{{ $t('grille') }}</span>
 			</button>
@@ -453,11 +453,12 @@ import fscreen from 'fscreen'
 import { saveAs } from 'file-saver'
 import imagesLoaded from 'imagesloaded'
 import sauvegarde from './sauvegarde.js'
+import navOrdre from './navOrdre.js'
 import { lecteur, recupererDonneesLecteur, genererHtml, recupererRessource } from '@/lecteur'
 
 export default {
 	name: 'App',
-	mixins: [sauvegarde],
+	mixins: [sauvegarde, navOrdre],
 	provide () {
 		return {
 			app: this
@@ -1804,7 +1805,7 @@ export default {
 		modifierModule (event) {
 			const module = event.target.value
 			if (event.target.checked === true) {
-				this.modules.push(module)
+				this.insererModule(module)
 				this.notification = { type: 'succes', message: this.$t('moduleActive') }
 			} else {
 				const index = this.modules.indexOf(module)
@@ -2139,6 +2140,7 @@ export default {
 			if (!nav) {
 				return
 			}
+			this.appliquerOrdreModules()
 			// Mehrzeilig umbrechen; braucht es mehr als zwei Reihen, kompakt ohne Beschriftung
 			const reihen = () => new Set(Array.from(nav.querySelectorAll('button')).map(bouton => bouton.offsetTop)).size
 			nav.classList.remove('compact')
