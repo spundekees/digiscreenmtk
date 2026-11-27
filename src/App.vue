@@ -618,6 +618,7 @@ export default {
 		},
 		chargement (valeur) {
 			if (valeur) this.annoncer(this.$t('chargementEnCours'))
+			if (!valeur) this.$nextTick(this.annotationAuto)
 		},
 		importDonnees (valeur) {
 			if (valeur) this.annoncer(this.$t('chargementEnCours'))
@@ -625,6 +626,8 @@ export default {
 		fondEcriture (valeur) {
 			if (!valeur) {
 				this.deplacementFond = false
+			} else {
+				this.$nextTick(this.annotationAuto)
 			}
 		},
 		page (page) {
@@ -701,6 +704,7 @@ export default {
 					} else {
 						this.annotation = false
 					}
+					this.annotationAuto()
 					this.retroaction = false
 					this.modalites = false
 					setTimeout(() => {
@@ -1551,6 +1555,12 @@ export default {
 				this.audio.play()
 				saveAs(canvas.toDataURL('image/jpeg', 0.95).replace('image/jpeg', 'image/octet-stream'), 'capture_' + Date.now() + '.jpg')
 			}).catch(() => {})
+		},
+		annotationAuto () {
+			// Auf Lineaturen und Karo/Punkte die Annotation (Stift, Zirkel …) automatisch einblenden (Medienzentrum MTK)
+			if (this.fondEcriture && !this.annotation && !this.lectureSeule && !this.chargement) {
+				this.annoter()
+			}
 		},
 		annoter () {
 			this.annotation = true

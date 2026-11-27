@@ -140,9 +140,6 @@
 			<button type="button" id="outil-etoile" class="outil" :title="$t('etoile')" :aria-label="$t('etoile')" :aria-pressed="(outilSelectionner && outil === 'etoile') ? 'true' : 'false'" :class="{'actif': outilSelectionner && outil === 'etoile'}" @click="selectionnerOutil('etoile')">
 				<img src="@/assets/img/etoile.png" :alt="$t('etoile')">
 			</button>
-			<button type="button" id="outil-surlignage" class="outil" :title="$t('surlignage')" :aria-label="$t('surlignage')" :aria-pressed="(outilSelectionner && outil === 'surlignage') ? 'true' : 'false'" :class="{'actif': outilSelectionner && outil === 'surlignage'}" @click="selectionnerOutil('surlignage')">
-				<img src="@/assets/img/surligneur.png" :alt="$t('surlignage')">
-			</button>
 			<button type="button" id="outil-ligne" class="outil" :title="$t('ligne')" :aria-label="$t('ligne')" :aria-pressed="(outilSelectionner && outil === 'ligne') ? 'true' : 'false'" :class="{'actif': outilSelectionner && outil === 'ligne'}" @click="selectionnerOutil('ligne')">
 				<img src="@/assets/img/ligne.png" :alt="$t('ligne')">
 			</button>
@@ -188,6 +185,13 @@
 				<span><i class="material-icons" aria-hidden="true">flip_to_back</i></span>
 			</button>
 			<span class="separateur" v-if="outilSelectionner" />
+			<button type="button" class="option icone mode-stift" :title="$t('stiftNormal')" :aria-label="$t('stiftNormal')" :aria-pressed="stiftModus === 'stylo' ? 'true' : 'false'" :class="{'actif': stiftModus === 'stylo'}" v-if="outilDessiner" @click="basculerStiftModus('stylo')">
+				<img src="@/assets/img/stylo.png" alt="">
+			</button>
+			<button type="button" class="option icone mode-stift" :title="$t('textmarker')" :aria-label="$t('textmarker')" :aria-pressed="stiftModus === 'marqueur' ? 'true' : 'false'" :class="{'actif': stiftModus === 'marqueur'}" v-if="outilDessiner" @click="basculerStiftModus('marqueur')">
+				<img src="@/assets/img/surligneur.png" alt="">
+			</button>
+			<span class="separateur" v-if="outilDessiner" />
 			<button type="button" class="option noir" :title="$t('noir')" :aria-label="$t('noir')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#000000') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#000000'}" @click="modifierCouleur('#000000')" v-if="!outilGommer && nom !== 'selection' && objet !== 'label'">
 				<span class="couleur noir" />
 			</button>
@@ -309,6 +313,7 @@
 <script>
 import zirkel from './annotation/zirkel.js'
 import gomme from './annotation/gomme.js'
+import textmarker from './annotation/textmarker.js'
 import werkzeugleiste from './annotation/werkzeugleiste.js'
 import geodreieck from './annotation/geodreieck.js'
 import remplir from './annotation/remplir.js'
@@ -322,7 +327,7 @@ const tailleMaxHistorique = 50
 export default {
 	name: 'CAnnotation',
 	inject: ['app'],
-	mixins: [zirkel, geodreieck, remplir, arrierePlan, gomme, werkzeugleiste],
+	mixins: [zirkel, geodreieck, remplir, arrierePlan, gomme, werkzeugleiste, textmarker],
 	props: {
 		panneaux: { type: Array, required: true },
 		annotations: { type: Object, required: true },
@@ -440,9 +445,12 @@ export default {
 		outilDessiner (valeur) {
 			if (valeur === true) {
 				this.desactiverDeplacement()
-				this.couleurStylo = '#000000'
+				this.couleurStylo = this.stiftModus === 'marqueur' ? this.reglagesMarqueur.couleur : '#000000'
 				this.couleurSelecteur = '#000000'
 			} else {
+				if (this.stiftModus === 'marqueur') {
+					this.reglagesMarqueur = this.lireReglagesStift()
+				}
 				this.couleurSelecteur = '#000000'
 			}
 			this.validerDessin()
@@ -1005,7 +1013,7 @@ export default {
 				try {
 					event.evt.target.setPointerCapture(event.evt.pointerId)
 				} catch {}
-				this.traitStylo = new Konva.Line({ points: [position.x, position.y, position.x, position.y], tension: this.geoLineal ? 0 : 0.5, globalCompositeOperation: 'source-over', stroke: this.couleurStylo, strokeWidth: this.epaisseurStylo, opacity: this.transparenceStylo, lineJoin: 'round', lineCap: 'round', listening: false, perfectDrawEnabled: false, shadowForStrokeEnabled: false })
+				this.traitStylo = new Konva.Line({ points: [position.x, position.y, position.x, position.y], tension: this.geoLineal ? 0 : 0.5, globalCompositeOperation: this.stiftModus === 'marqueur' ? 'multiply' : 'source-over', stroke: this.couleurStylo, strokeWidth: this.epaisseurStylo, opacity: this.transparenceStylo, lineJoin: 'round', lineCap: 'round', listening: false, perfectDrawEnabled: false, shadowForStrokeEnabled: false })
 				const calque = this.$refs.calqueStylo.getNode()
 				calque.add(this.traitStylo)
 				calque.batchDraw()
@@ -1151,7 +1159,7 @@ export default {
 			this.traitStylo = null
 			this.pointeurStylo = null
 			this.id++
-			const element = { name: 'dess' + this.id, objet: 'dessin', points: markRaw(points), globalCompositeOperation: 'source-over', stroke: ligne.stroke(), strokeWidth: ligne.strokeWidth(), opacity: ligne.opacity(), hitStrokeWidth: 25, lineJoin: 'round', lineCap: 'round', draggable: false, verrouille: false }
+			const element = { name: 'dess' + this.id, objet: 'dessin', points: markRaw(points), globalCompositeOperation: ligne.globalCompositeOperation() || 'source-over', stroke: ligne.stroke(), strokeWidth: ligne.strokeWidth(), opacity: ligne.opacity(), hitStrokeWidth: 25, lineJoin: 'round', lineCap: 'round', draggable: false, verrouille: false }
 			if (!lineal) {
 				// Weiche Kurve durch die Abtastpunkte statt eckiger Teilstrecken (Medienzentrum MTK)
 				element.tension = 0.5
@@ -1936,6 +1944,24 @@ export default {
 
 #options .option.icone {
 	width: auto;
+}
+
+#options .option.mode-stift {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 26px;
+	border-radius: 6px;
+}
+
+#options .option.mode-stift.actif {
+	background: #01ced1;
+}
+
+#options .option.mode-stift img {
+	max-width: 18px;
+	max-height: 18px;
 }
 
 #options .option.icone.orange span {
