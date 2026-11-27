@@ -14,6 +14,23 @@
 			<div class="chargement"><div aria-hidden="true" /><div aria-hidden="true" /><div aria-hidden="true" /><div aria-hidden="true" /><div aria-hidden="true" /><div aria-hidden="true" /><div aria-hidden="true" /><div aria-hidden="true" /><div aria-hidden="true" /><span class="lecteur-ecran">{{ $t('chargementEnCours') }}</span></div>
 		</div>
 
+		<div id="sauvegarde-trouvee" role="dialog" aria-modal="true" aria-labelledby="titre-sauvegarde" v-if="sauvegardeTrouvee && !chargement">
+			<div class="contenu-sauvegarde">
+				<h2 id="titre-sauvegarde">{{ $t('sauvegardeTitre') }}</h2>
+				<p>{{ $t('sauvegardeTexte', { date: dateSauvegardeTrouvee }) }}</p>
+				<div class="actions">
+					<button type="button" class="bouton" @click="ignorerSauvegarde">{{ $t('sauvegardeIgnorer') }}</button>
+					<button type="button" class="bouton principal" @click="restaurerSauvegarde">{{ $t('sauvegardeRestaurer') }}</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="rappel-sauvegarde" role="status" v-if="rappelSauvegarde && !sauvegardeTrouvee">
+			<span>{{ $t('rappelSauvegarde') }}</span>
+			<button type="button" class="bouton principal" @click="enregistrerTafel">{{ $t('rappelSpeichern') }}</button>
+			<button type="button" class="bouton" @click="rappelPlusTard">{{ $t('rappelPlusTard') }}</button>
+		</div>
+
 		<Chargement :chargementPage="chargementPage" v-if="chargementPage" />
 
 		<div id="pages" v-if="pages.length > 1" :data-html2canvas-ignore="true">
@@ -22,7 +39,7 @@
 			</div>
 		</div>
 
-		<Annotation :panneaux="panneaux" :annotations="annotations" :largeur="largeur" :hauteur="hauteur" :nav="nav" @fermer="arreterAnnoter" @outilDeplacer="definirOutilDeplacer" v-if="annotation" />
+		<Annotation ref="annotation" :panneaux="panneaux" :annotations="annotations" :largeur="largeur" :hauteur="hauteur" :nav="nav" @fermer="arreterAnnoter" @outilDeplacer="definirOutilDeplacer" v-if="annotation" />
 
 		<div id="grille" :class="grille.couleur + ' grille-' + grille.colonnes" v-if="Object.keys(grille).length > 0">
 			<span v-for="element in (grille.colonnes * grille.lignes)" :key="'element_' + element" />
@@ -285,6 +302,10 @@
 			<div class="separateur">
 				<span>·</span>
 			</div>
+			<button type="button" id="bouton-tafel-speichern" :disabled="disabledNav" :title="$t('tafelSpeichern')" :aria-label="$t('tafelSpeichern')" @click="enregistrerTafel" v-if="!lectureSeule">
+				<span class="icone"><i class="material-icons" aria-hidden="true">save</i></span>
+				<span class="titre">{{ $t('tafelSpeichern') }}</span>
+			</button>
 			<button type="button" id="bouton-fonds" :disabled="disabledNav" :title="$t('hintergruende')" :aria-label="$t('hintergruende')" @click="ouvrirMenuFonds">
 				<span class="icone"><i class="material-icons" aria-hidden="true">wallpaper</i></span>
 				<span class="titre">{{ $t('hintergruende') }}</span>
@@ -431,10 +452,12 @@ import html2canvas from 'html2canvas'
 import fscreen from 'fscreen'
 import { saveAs } from 'file-saver'
 import imagesLoaded from 'imagesloaded'
+import sauvegarde from './sauvegarde.js'
 import { lecteur, recupererDonneesLecteur, genererHtml, recupererRessource } from '@/lecteur'
 
 export default {
 	name: 'App',
+	mixins: [sauvegarde],
 	provide () {
 		return {
 			app: this
@@ -618,7 +641,10 @@ export default {
 		},
 		chargement (valeur) {
 			if (valeur) this.annoncer(this.$t('chargementEnCours'))
-			if (!valeur) this.$nextTick(this.annotationAuto)
+			if (!valeur) {
+				this.$nextTick(this.annotationAuto)
+				this.chercherSauvegarde()
+			}
 		},
 		importDonnees (valeur) {
 			if (valeur) this.annoncer(this.$t('chargementEnCours'))
@@ -689,6 +715,10 @@ export default {
 		},
 		exportTermine (valeur) {
 			if (valeur === false) return
+			if (valeur === true && this.export.type === 'sauvegarde') {
+				this.terminerSauvegardeAuto()
+				return
+			}
 			if (valeur === true && this.export.type === 'page') {
 				const page = this.export.page
 				this.panneauxPage.forEach((panneau) => {
@@ -779,7 +809,11 @@ export default {
 				if (this.export.format === 'html') {
 					message = this.$t('exportHtmlTermine')
 				}
+				const toutesLesPages = this.export.nombre === 'pages'
 				const terminer = (notification) => {
+					if (notification.type === 'succes' && toutesLesPages) {
+						this.marquerFichierEnregistre()
+					}
 					this.chargementPage = false
 					this.notification = notification
 					this.exportDonnees = false
@@ -1472,6 +1506,7 @@ export default {
 			if (!panneau) return
 			this.panneaux.push(panneau)
 			this.panneauxPage.push(panneau)
+			this.annotationPlatzFuerPanel()
 			this.$nextTick(() => {
 				this.afficherPanneau(id)
 			})
@@ -1556,6 +1591,13 @@ export default {
 				saveAs(canvas.toDataURL('image/jpeg', 0.95).replace('image/jpeg', 'image/octet-stream'), 'capture_' + Date.now() + '.jpg')
 			}).catch(() => {})
 		},
+		annotationPlatzFuerPanel () {
+			// Neues Panel bei offener Annotation: auf „Verschieben“ schalten, damit das Panel bedienbar ist
+			// (Zeichnungen bleiben sichtbar) – Medienzentrum MTK
+			if (this.annotation && !this.outilDeplacer) {
+				this.$nextTick(() => this.$refs.annotation?.definirOutilPrincipal('deplacer'))
+			}
+		},
 		annotationAuto () {
 			// Auf Lineaturen und Karo/Punkte die Annotation (Stift, Zirkel …) automatisch einblenden (Medienzentrum MTK)
 			if (this.fondEcriture && !this.annotation && !this.lectureSeule && !this.chargement) {
@@ -1622,70 +1664,7 @@ export default {
 					this.importTermine = true
 					return
 				}
-				const donnees = JSON.parse(e.target.result)
-				this.pages = donnees.pages
-				this.page = donnees.page
-				this.modules = this.migrerModules(donnees.modules)
-				this.panneaux = this.migrerPanneaux(donnees.panneaux)
-				this.corbeille = []
-				this.langue = donnees.langue
-				this.$i18n.locale = donnees.langue
-				if (donnees.hasOwnProperty('nav')) {
-					this.nav = donnees.nav
-				}
-				if (donnees.hasOwnProperty('fonte')) {
-					this.fonte = donnees.fonte
-				}
-				if (donnees.hasOwnProperty('lectureSeule')) {
-					this.lectureSeule = donnees.lectureSeule
-				}
-				this.importTermine = true
-				if (page === this.page) {
-					if (this.pages[this.page - 1].annotation === false) {
-						this.annotation = false
-					} else {
-						this.annotation = true
-					}
-					this.retroaction = false
-					this.modalites = false
-					this.panneauxPage.forEach((panneau) => {
-						document.querySelector('#' + panneau.id)?.close()
-					})
-					this.panneauxPage = []
-					const panneauxPage = donnees.panneaux.filter((element) => {
-						return element.page === donnees.page
-					})
-					imagesLoaded('main', { background: true }, () => {
-						setTimeout(() => {
-							this.panneauxPage.push(...panneauxPage)
-							for (let i = 0; i < this.panneauxPage.length; i++) {
-								if (this.panneauxPage[i].type === 'retroaction') {
-									this.retroaction = true
-								}
-								if (this.panneauxPage[i].type === 'modalites') {
-									this.modalites = true
-								}
-							}
-							if (donnees.hasOwnProperty('ecran') && donnees.ecran.largeur > document.body.clientWidth) {
-								const zoom = Math.ceil((document.body.clientWidth / donnees.ecran.largeur) * 100)
-								alert(this.$t('alerteEcran', { zoom: zoom }))
-							}
-							this.$nextTick(() => {
-								if (this.lectureSeule === true) {
-									const panneaux = document.querySelectorAll('.jsPanel')
-									panneaux.forEach((panneau) => {
-										if (panneau.querySelector('.jsPanel-btn-close')) {
-											panneau.setControlStatus('close', 'hide')
-										}
-										if (panneau.querySelector('.jsPanel-btn-send')) {
-											panneau.setControlStatus('send', 'hide')
-										}
-									})
-								}
-							})
-						}, 150)
-					})
-				}
+				this.chargerDonneesImport(JSON.parse(e.target.result), page)
 			}
 			reader.readAsText(fichier)
 			document.querySelector('#televerser').value = ''
@@ -1695,6 +1674,81 @@ export default {
 					this.importTermine = false
 				})
 			})
+		},
+		chargerDonneesImport (donnees, page = this.page) {
+			// Gemeinsam genutzt von Datei-Import und Wiederherstellung der automatischen Sicherung
+			if (!this.importDonnees) {
+				this.importDonnees = true
+				this.$nextTick(() => {
+					document.querySelector('#import')?.addEventListener('animationend', () => {
+						this.importDonnees = false
+						this.importTermine = false
+					})
+				})
+			}
+			this.pages = donnees.pages
+			this.page = donnees.page
+			this.modules = this.migrerModules(donnees.modules)
+			this.panneaux = this.migrerPanneaux(donnees.panneaux)
+			this.corbeille = []
+			this.langue = donnees.langue
+			this.$i18n.locale = donnees.langue
+			if (donnees.hasOwnProperty('nav')) {
+				this.nav = donnees.nav
+			}
+			if (donnees.hasOwnProperty('fonte')) {
+				this.fonte = donnees.fonte
+			}
+			if (donnees.hasOwnProperty('lectureSeule')) {
+				this.lectureSeule = donnees.lectureSeule
+			}
+			this.importTermine = true
+			if (page === this.page) {
+				if (this.pages[this.page - 1].annotation === false) {
+					this.annotation = false
+				} else {
+					this.annotation = true
+				}
+				this.retroaction = false
+				this.modalites = false
+				this.panneauxPage.forEach((panneau) => {
+					document.querySelector('#' + panneau.id)?.close()
+				})
+				this.panneauxPage = []
+				const panneauxPage = donnees.panneaux.filter((element) => {
+					return element.page === donnees.page
+				})
+				imagesLoaded('main', { background: true }, () => {
+					setTimeout(() => {
+						this.panneauxPage.push(...panneauxPage)
+						for (let i = 0; i < this.panneauxPage.length; i++) {
+							if (this.panneauxPage[i].type === 'retroaction') {
+								this.retroaction = true
+							}
+							if (this.panneauxPage[i].type === 'modalites') {
+								this.modalites = true
+							}
+						}
+						if (donnees.hasOwnProperty('ecran') && donnees.ecran.largeur > document.body.clientWidth) {
+							const zoom = Math.ceil((document.body.clientWidth / donnees.ecran.largeur) * 100)
+							alert(this.$t('alerteEcran', { zoom: zoom }))
+						}
+						this.$nextTick(() => {
+							if (this.lectureSeule === true) {
+								const panneaux = document.querySelectorAll('.jsPanel')
+								panneaux.forEach((panneau) => {
+									if (panneau.querySelector('.jsPanel-btn-close')) {
+										panneau.setControlStatus('close', 'hide')
+									}
+									if (panneau.querySelector('.jsPanel-btn-send')) {
+										panneau.setControlStatus('send', 'hide')
+									}
+								})
+							}
+						})
+					}, 150)
+				})
+			}
 		},
 		exporter (nombre, format = 'dgs') {
 			const date = new Date()
@@ -1826,6 +1880,7 @@ export default {
 								const panneau = { page: this.page, id: id, type: 'image', mode: 'lecture', statut: '', dimensions: {}, position: {}, contenu: { image: fichier, requete: '', page: 1, zoom: 1 }, w: 40, h: 30, x: largeur - this.convertirRem(20), y: hauteur - this.convertirRem(15) }
 								this.panneaux.push(panneau)
 								this.panneauxPage.push(panneau)
+								this.annotationPlatzFuerPanel()
 								this.$nextTick(() => { this.afficherPanneau(id) })
 							}
 						}
@@ -1869,6 +1924,7 @@ export default {
 									const panneau = { page: this.page, id: id, type: type, mode: 'lecture', statut: '', dimensions: {}, position: {}, contenu: { image: fichier, requete: '', page: 1, zoom: 1 }, w: 40, h: 30, x: largeur - this.convertirRem(20), y: hauteur - this.convertirRem(15) }
 									this.panneaux.push(panneau)
 									this.panneauxPage.push(panneau)
+									this.annotationPlatzFuerPanel()
 									this.$nextTick(() => { this.afficherPanneau(id) })
 								}
 							}
@@ -1881,6 +1937,7 @@ export default {
 								const panneau = { page: this.page, id: id, type: type, mode: 'lecture', statut: '', dimensions: {}, position: {}, contenu: { audio: fichier, dataURL: dataURL, vitesse: 1 }, w: 40, h: 12, x: largeur - this.convertirRem(20), y: hauteur - this.convertirRem(6) }
 								this.panneaux.push(panneau)
 								this.panneauxPage.push(panneau)
+								this.annotationPlatzFuerPanel()
 								this.$nextTick(() => { this.afficherPanneau(id) })
 							}
 						} else if (type === 'video') {
@@ -1892,6 +1949,7 @@ export default {
 								const panneau = { page: this.page, id: id, type: type, mode: 'lecture', statut: '', dimensions: {}, position: {}, contenu: { video: fichier, videoId: '', type: event.dataTransfer.files[i].type, dataURL: dataURL, debutMinutes: '', debutSecondes: '', finMinutes: '', finSecondes: '' }, w: 48, h: 31.5, x: largeur - this.convertirRem(24), y: hauteur - this.convertirRem(15.75) }
 								this.panneaux.push(panneau)
 								this.panneauxPage.push(panneau)
+								this.annotationPlatzFuerPanel()
 								this.$nextTick(() => { this.afficherPanneau(id) })
 							}
 						} else if (type === 'pdf') {
@@ -1903,6 +1961,7 @@ export default {
 								const panneau = { page: this.page, id: id, type: 'document', mode: 'lecture', statut: '', dimensions: {}, position: {}, contenu: { document: fichier, dataURL: dataURL, type: type }, w: 50, h: 35, x: largeur - this.convertirRem(25), y: hauteur - this.convertirRem(17.5) }
 								this.panneaux.push(panneau)
 								this.panneauxPage.push(panneau)
+								this.annotationPlatzFuerPanel()
 								this.$nextTick(() => { this.afficherPanneau(id) })
 							}
 						}

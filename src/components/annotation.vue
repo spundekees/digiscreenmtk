@@ -1698,7 +1698,8 @@ export default {
 }
 
 #annotation.avec-nav {
-	bottom: 7.5rem;
+	/* Höhe der (ggf. mehrzeiligen) Programmleiste – sonst verdeckt die Zeichenfläche deren obere Reihe (Medienzentrum MTK) */
+	bottom: var(--hauteur-nav, 7.5rem);
 }
 
 #annotation .konvajs-content {

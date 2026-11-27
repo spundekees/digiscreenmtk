@@ -1643,3 +1643,70 @@ nav .logo-nav {
 #menu-parametres.nur-fonds .contenu > *:not(#libelle-parametres-1):not(.fond) {
 	display: none !important;
 }
+
+/* Automatische Sicherung und Speichern-Erinnerung (Medienzentrum MTK) */
+#sauvegarde-trouvee {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.45);
+}
+
+#sauvegarde-trouvee .contenu-sauvegarde {
+	max-width: 46rem;
+	margin: 2rem;
+	padding: 2.4rem 2.8rem;
+	background: #fff;
+	border-radius: 1.2rem;
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+	font-size: 1.6rem;
+	line-height: 1.5;
+}
+
+#sauvegarde-trouvee h2 {
+	margin-bottom: 1rem;
+	font-size: 2rem;
+	font-weight: 700;
+}
+
+#sauvegarde-trouvee .actions,
+#rappel-sauvegarde {
+	display: flex;
+	gap: 1rem;
+	justify-content: flex-end;
+	align-items: center;
+	margin-top: 1.6rem;
+}
+
+#sauvegarde-trouvee .bouton,
+#rappel-sauvegarde .bouton {
+	padding: 0.7rem 1.4rem;
+	border: 1px solid #001d1d;
+	border-radius: 0.6rem;
+	background: #fff;
+	font-size: 1.5rem;
+	cursor: pointer;
+}
+
+#sauvegarde-trouvee .bouton.principal,
+#rappel-sauvegarde .bouton.principal {
+	background: #00ced1;
+	border-color: #00ced1;
+	font-weight: 700;
+}
+
+#rappel-sauvegarde {
+	position: fixed;
+	right: 1.5rem;
+	bottom: calc(var(--hauteur-nav, 7.5rem) + 1.2rem);
+	z-index: 10005;
+	margin: 0;
+	padding: 1rem 1.4rem;
+	background: #fff;
+	border-radius: 1rem;
+	box-shadow: 0 2px 14px rgba(0, 0, 0, 0.22);
+	font-size: 1.5rem;
+}
