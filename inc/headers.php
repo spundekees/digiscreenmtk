@@ -11,6 +11,9 @@ if ($methode !== 'POST' && $methode !== 'OPTIONS') {
 	exit();
 }
 
+// Antworten nie als HTML ausliefern (Schutz vor eingeschleustem HTML/Script) – Medienzentrum MTK
+header('Content-Type: text/plain; charset=utf-8');
+
 require 'env.php';
 require 'fonctions.php';
 

@@ -38,7 +38,7 @@ Nachgewiesen im lokalen Test: fremde Herkunft → HTTP 200; mit gesetzter Variab
 ```
 AUTHORIZED_DOMAINS=digiscreen-mtk.de
 ```
-Zusätzlich empfehlenswert (Codeänderung, noch nicht umgesetzt): in `inc/headers.php` `Content-Type: text/plain` setzen.
+Zusätzlich umgesetzt (27.11.2026): `inc/headers.php` liefert alle Antworten als `text/plain` aus (siehe Abschnitt 5).
 
 ### 3.2 Externe Dienste, die nur bei Nutzung angesprochen werden
 YouTube-/Vimeo-Einbettungen (YouTube im datensparsamen „nocookie“-Modus), noembed.com (Vorschau bei Einbettungen), Pixabay- und YouTube-Suche (nur mit API-Schlüssel, derzeit nicht aktiv). Bei als einzelne HTML-Datei exportierten Tafeln wird MathJax – nur wenn eine Formel vorkommt – weiterhin von jsDelivr geladen, da diese Dateien keinen eigenen Server haben. Für die Datenschutzhinweise der Schulen dokumentieren.
@@ -53,3 +53,23 @@ YouTube-/Vimeo-Einbettungen (YouTube im datensparsamen „nocookie“-Modus), no
 - MathJax 3.2.2 (Apache-2.0) wird aus `public/static/mathjax` vom eigenen Server geladen statt von cdn.jsdelivr.net, und nur, wenn eine Formel angezeigt wird.
 - vue-i18n 10.0.8 → 11.4.24 (behebt 4 Schwachstellen „hoch“, XSS über `escapeParameter`).
 - Diese Datei und die `CLAUDE.md` wurden ins Repository aufgenommen.
+
+## 5. Server-Härtung (27.11.2026)
+
+Umgesetzt in `.htaccess` und `inc/headers.php`, geprüft mit Apache 2.4 + PHP auf einem Testserver:
+
+| Maßnahme | Prüfergebnis |
+|---|---|
+| Weiterleitung http → https | 301 auf https |
+| HSTS (1 Jahr, nur bei HTTPS) | Header gesetzt |
+| Content-Security-Policy (Programmcode nur vom eigenen Server; Bilder, Medien, Einbettungen von HTTPS-Seiten erlaubt; keine Einbettung in fremde Seiten) | 51 Module geöffnet, Annotation, Formeln, Radierer: **0 CSP-Verstöße, 0 Fehler** |
+| X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy | Header gesetzt |
+| Versteckte Dateien (.env, .htaccess, .git) gesperrt | 403 |
+| `inc/`: nur `recuperer_donnees_dgs.php` und `recuperer_icone.php` erreichbar; Digidrive-API, `enregistrer_donnees_dgs.php` und Hilfsdateien gesperrt | 403 für alle übrigen |
+| PHP-Antworten als `text/plain` | Content-Type geprüft |
+| Keine Verzeichnislisten | 403 |
+| Komprimierung (gzip) und Browser-Cache (Programmdateien 1 Jahr, sonstige Dateien 1 Tag, Startseite immer prüfen) | Header geprüft |
+
+**Hinweis zum Funktionsumfang:** Das Zurückspeichern einer Tafel auf den Server (`enregistrer_donnees_dgs.php`) setzt im Originalprojekt einen S3-Speicher und das AWS-SDK (`vendor/`) voraus und war auf diesem Server nie funktionsfähig. Lehrkräfte speichern Tafeln als Datei (.dgs/.html). PHP wird nur noch für das Öffnen einer Tafel über eine Adresse und für die Symbole bei Link-Panels genutzt.
+
+**Einbettung in andere Seiten:** Wegen `frame-ancestors 'self'` kann Digiscreen nicht in fremde Webseiten (z. B. Moodle per iframe) eingebettet werden. Bei Bedarf die gewünschten Domains in `.htaccess` ergänzen.
