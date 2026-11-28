@@ -1,6 +1,7 @@
 // Zeichnungen, Zirkel und Geodreieck mitbewegen, wenn der Schreib-Hintergrund skaliert oder verschoben wird.
 // Gehört zu annotation.vue.
 import echelonnerAnnotations, { deplacerAnnotations } from '../../echelleAnnotations.js'
+import { pivotFond } from '../../blatt.js'
 
 export default {
 	computed: {
@@ -27,6 +28,10 @@ export default {
 				this.zirkel.y += vy
 				this.geo.x += vx
 				this.geo.y += vy
+				if (this.uhr) {
+					this.uhr.x += vx
+					this.uhr.y += vy
+				}
 				if (this.items.length > 0) {
 					this.reinitialiserSelection()
 					deplacerAnnotations(this.items, vx, vy)
@@ -49,15 +54,21 @@ export default {
 			}
 			const rm = main.getBoundingClientRect()
 			const ra = annotation.getBoundingClientRect()
-			// Drehpunkt = Bezugspunkt des Musters: links oben bei der Häuschen-Lineatur, sonst Bildschirmmitte
+			// Drehpunkt = Bezugspunkt des Musters (Blatt: linker Blattrand, sonst Bildschirmmitte)
 			const gauche = rm.left + main.clientLeft - ra.left
 			const haut = rm.top + main.clientTop - ra.top
-			const pivot = neu.fond.includes('/img/lineatur-haeuschen') ? { x: gauche + neu.dx, y: haut + neu.dy } : { x: gauche + main.clientWidth / 2 + neu.dx, y: haut + main.clientHeight / 2 + neu.dy }
+			const p = pivotFond(neu.fond, main.clientWidth, main.clientHeight, { x: neu.dx, y: neu.dy })
+			const pivot = { x: gauche + p.x, y: haut + p.y }
 			this.zirkel.x = pivot.x + (this.zirkel.x - pivot.x) * f
 			this.zirkel.y = pivot.y + (this.zirkel.y - pivot.y) * f
 			this.zirkel.r = Math.min(Math.max(this.zirkel.r * f, 10), 3000)
 			this.geo.x = pivot.x + (this.geo.x - pivot.x) * f
 			this.geo.y = pivot.y + (this.geo.y - pivot.y) * f
+			if (this.uhr) {
+				this.uhr.x = pivot.x + (this.uhr.x - pivot.x) * f
+				this.uhr.y = pivot.y + (this.uhr.y - pivot.y) * f
+				this.uhr.r = Math.min(Math.max(this.uhr.r * f, 60), 1200)
+			}
 			// Alle gezeichneten Objekte wachsen mit
 			if (this.items.length > 0) {
 				this.reinitialiserSelection()

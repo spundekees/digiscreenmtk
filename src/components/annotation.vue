@@ -18,6 +18,7 @@
 						<v-line :config="item" v-else-if="item.objet === 'dessin'" @dragstart="selectionnerObjet" @dragend="deplacerFin" />
 						<v-line :config="item" v-else-if="item.objet === 'gomme'" />
 						<v-path :config="item" v-else-if="item.objet === 'remplissage'" @dragstart="selectionnerObjet" @dragend="deplacerFin" @transformend="redimensionnerFin" />
+						<v-image :config="configMateriel(item)" v-else-if="item.objet === 'materiel'" @dragstart="selectionnerObjet" @dragend="deplacerFin" @transformend="redimensionnerFin" />
 					</template>
 					<v-rect :config="configSelection" @dragend="deplacerFin" @transformend="redimensionnerFin" />
 					<v-rect :config="configCreationRectangle" @dragend="deplacerFin" @transformend="redimensionnerFin" />
@@ -90,6 +91,38 @@
 					<path d="M53 -4l4 4M50 3l1-3 6-6 3 3-6 6z" fill="none" stroke="#2e63ae" stroke-width="1.1" stroke-linejoin="round" />
 				</g>
 			</svg>
+			<svg id="lernuhr" v-if="uhrVisible" :width="dimensionsCanva.w" :height="dimensionsCanva.h">
+				<g :transform="'translate(' + uhr.x + ' ' + uhr.y + ')'">
+					<circle class="uhr-ziffernblatt" :r="uhr.r" @pointerdown="uhrGesteDebut($event, 'deplacer')">
+						<title>{{ $t('uhrVerschieben') }}</title>
+					</circle>
+					<path class="uhr-striche" :d="uhrDessin.striche" :stroke-width="Math.max(1, uhr.r * 0.008)" />
+					<path class="uhr-striche" :d="uhrDessin.dicke" :stroke-width="Math.max(2, uhr.r * 0.022)" />
+					<text v-for="z in uhrDessin.zahlen" :key="'z' + z.t" class="uhr-zahl" :x="z.x" :y="z.y" :font-size="uhr.r * 0.19" text-anchor="middle" dominant-baseline="central">{{ z.t }}</text>
+					<template v-if="uhr.mit24">
+						<text v-for="z in uhrDessin.rot" :key="'r' + z.t" class="uhr-zahl-rot" :x="z.x" :y="z.y" :font-size="uhr.r * 0.1" text-anchor="middle" dominant-baseline="central">{{ z.t }}</text>
+					</template>
+					<g class="uhr-zeiger" :transform="'rotate(' + uhrWinkelStunde + ')'" role="slider" tabindex="0" :aria-label="$t('uhrStunde')" :aria-valuetext="uhrTexte" @pointerdown="uhrGesteDebut($event, 'stunde')" @keydown="uhrClavier($event, 'stunde')">
+						<line x1="0" :y1="uhr.r * 0.12" x2="0" :y2="-uhr.r * 0.5" stroke="transparent" :stroke-width="Math.max(30, uhr.r * 0.2)" stroke-linecap="round" />
+						<line class="uhr-stunde" x1="0" :y1="uhr.r * 0.1" x2="0" :y2="-uhr.r * 0.48" :stroke-width="uhr.r * 0.075" />
+					</g>
+					<g class="uhr-zeiger" :transform="'rotate(' + uhrWinkelMinute + ')'" role="slider" tabindex="0" :aria-label="$t('uhrMinute')" :aria-valuetext="uhrTexte" @pointerdown="uhrGesteDebut($event, 'minute')" @keydown="uhrClavier($event, 'minute')">
+						<line x1="0" :y1="uhr.r * 0.14" x2="0" :y2="-uhr.r * 0.82" stroke="transparent" :stroke-width="Math.max(26, uhr.r * 0.14)" stroke-linecap="round" />
+						<line class="uhr-minute" x1="0" :y1="uhr.r * 0.12" x2="0" :y2="-uhr.r * 0.8" :stroke-width="uhr.r * 0.04" />
+					</g>
+					<circle class="uhr-mitte" :r="uhr.r * 0.055" />
+					<g class="uhr-griff" :transform="'translate(' + (uhr.r * 0.82) + ' ' + (uhr.r * 0.82) + ')'" @pointerdown="uhrGesteDebut($event, 'taille')">
+						<title>{{ $t('uhrGroesse') }}</title>
+						<circle r="16" fill="#fff" stroke="#00707a" stroke-width="1.5" />
+						<path d="M-6 -6L6 6M6 6v-5M6 6h-5M-6 -6v5M-6 -6h5" stroke="#00707a" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+					</g>
+					<g class="uhr-griff" :transform="'translate(0 ' + (uhr.r + 26) + ')'" role="switch" tabindex="0" :aria-checked="uhr.mit24 ? 'true' : 'false'" :aria-label="$t('uhr24')" @pointerdown.stop.prevent @click="uhrUmschalten24" @keydown.enter.prevent="uhrUmschalten24" @keydown.space.prevent="uhrUmschalten24">
+						<title>{{ $t('uhr24') }}</title>
+						<rect x="-34" y="-14" width="68" height="28" rx="14" :fill="uhr.mit24 ? '#ffe5e5' : '#fff'" stroke="#d0021b" stroke-width="1.5" />
+						<text x="0" y="1" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#d0021b" :text-decoration="uhr.mit24 ? '' : 'line-through'">13–0</text>
+					</g>
+				</g>
+			</svg>
 		</div>
 
 		<div id="outils-annotation" key="outils" :style="styleOutils" :class="{'waagrecht': outilsWaagrecht, 'verschoben': outilsPosition, 'ziehen': outilsGeste}">
@@ -121,8 +154,17 @@
 			<button type="button" id="outil-remplir" class="outil" :title="$t('remplir')" :aria-label="$t('remplir')" :aria-pressed="outilRemplir ? 'true' : 'false'" :class="{'actif': outilRemplir}" @click="definirOutilPrincipal('remplir')">
 				<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M16.56 8.94L7.62 0 6.21 1.41l2.38 2.38-5.15 5.15c-.59.59-.59 1.54 0 2.12l5.5 5.5c.29.29.68.44 1.06.44s.77-.15 1.06-.44l5.5-5.5c.59-.58.59-1.53 0-2.12zM5.21 10L10 5.21 14.79 10H5.21zM19 11.5s-2 2.17-2 3.5c0 1.1.9 2 2 2s2-.9 2-2c0-1.33-2-3.5-2-3.5z" /><rect x="2" y="19.5" width="20" height="3.5" rx="1" fill="#f7d000" /></svg>
 			</button>
+			<button type="button" id="outil-geld" class="outil" :title="$t('rechengeld')" :aria-label="$t('rechengeld')" :aria-pressed="materielMenu === 'geld' ? 'true' : 'false'" :class="{'actif': materielMenu === 'geld'}" @click="basculerMateriel('geld')">
+				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="1.5" y="5" width="15" height="9" rx="1.5" fill="#dbe6f5" stroke="#20467d" stroke-width="1.4" /><rect x="1.5" y="5" width="5" height="9" rx="1.5" fill="#4f80c0" /><circle cx="15.5" cy="15.5" r="6.5" fill="#f3dc8d" stroke="#7d5f12" stroke-width="1.4" /><path d="M17.6 13a3 3 0 1 0 0 5M12.6 14.8h4M12.6 16.4h4" fill="none" stroke="#7d5f12" stroke-width="1.3" stroke-linecap="round" /></svg>
+			</button>
+			<button type="button" id="outil-dienes" class="outil" :title="$t('dienes')" :aria-label="$t('dienes')" :aria-pressed="materielMenu === 'dienes' ? 'true' : 'false'" :class="{'actif': materielMenu === 'dienes'}" @click="basculerMateriel('dienes')">
+				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><g stroke="#7a5320" stroke-width="1.2" stroke-linejoin="round"><path d="M2 9h12l3-3H5z" fill="#f9e6c1" /><path d="M14 9l3-3v12l-3 3z" fill="#ddb36d" /><rect x="2" y="9" width="12" height="12" fill="#f3d49a" /><path d="M5 9v12M8 9v12M11 9v12M2 12h12M2 15h12M2 18h12" fill="none" stroke-width="0.6" /><path d="M19 4h3v17h-3z" fill="#f3d49a" /><path d="M19 7.4h3M19 10.8h3M19 14.2h3M19 17.6h3" stroke-width="0.6" /></g></svg>
+			</button>
+			<button type="button" id="outil-uhr" class="outil" :title="$t('lernuhr')" :aria-label="$t('lernuhr')" :aria-pressed="uhrVisible ? 'true' : 'false'" :class="{'actif': uhrVisible}" @click="basculerUhr">
+				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#fff" stroke="#000" stroke-width="1.8" /><path d="M12 3.5v1.6M20.5 12h-1.6M12 20.5v-1.6M3.5 12h1.6" stroke="#000" stroke-width="1.4" /><path d="M12 12V7" stroke="#1f5fbf" stroke-width="2.4" stroke-linecap="round" /><path d="M12 12l4.6 2.6" stroke="#000" stroke-width="1.6" stroke-linecap="round" /><circle cx="12" cy="12" r="1.4" fill="#d0021b" /></svg>
+			</button>
 			<button type="button" class="outil" :title="$t('deplacerPanneaux')" :aria-label="$t('deplacerPanneaux')" :aria-pressed="(outilDeplacer) ? 'true' : 'false'" :class="{'actif': outilDeplacer}" @click="definirOutilPrincipal('deplacer')">
-				<img src="@/assets/img/pan.png" :alt="$t('deplacerPanneaux')">
+				<i class="material-icons" aria-hidden="true" style="font-size: 22px;">touch_app</i>
 			</button>
 			<span class="separateur" />
 			<button type="button" id="outil-rectangle" class="outil" :title="$t('rectangle')" :aria-label="$t('rectangle')" :aria-pressed="(outilSelectionner && outil === 'rectangle') ? 'true' : 'false'" :class="{'actif': outilSelectionner && outil === 'rectangle'}" @click="selectionnerOutil('rectangle')">
@@ -192,25 +234,25 @@
 				<img src="@/assets/img/surligneur.png" alt="">
 			</button>
 			<span class="separateur" v-if="outilDessiner" />
-			<button type="button" class="option noir" :title="$t('noir')" :aria-label="$t('noir')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#000000') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#000000'}" @click="modifierCouleur('#000000')" v-if="!outilGommer && nom !== 'selection' && objet !== 'label'">
+			<button type="button" class="option noir" :title="$t('noir')" :aria-label="$t('noir')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#000000') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#000000'}" @click="modifierCouleur('#000000')" v-if="!outilGommer && nom !== 'selection' && objet !== 'materiel' && objet !== 'label'">
 				<span class="couleur noir" />
 			</button>
-			<button type="button" class="option blanc" :title="$t('blanc')" :aria-label="$t('blanc')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffffff') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffffff'}" @click="modifierCouleur('#ffffff')" v-if="!outilGommer && nom !== 'selection' && objet !== 'label'">
+			<button type="button" class="option blanc" :title="$t('blanc')" :aria-label="$t('blanc')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffffff') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffffff'}" @click="modifierCouleur('#ffffff')" v-if="!outilGommer && nom !== 'selection' && objet !== 'materiel' && objet !== 'label'">
 				<span class="couleur blanc" />
 			</button>
-			<button type="button" class="option rouge" :title="$t('rouge')" :aria-label="$t('rouge')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ff0000') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ff0000'}" @click="modifierCouleur('#ff0000')" v-if="!outilGommer && nom !== 'selection'">
+			<button type="button" class="option rouge" :title="$t('rouge')" :aria-label="$t('rouge')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ff0000') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ff0000'}" @click="modifierCouleur('#ff0000')" v-if="!outilGommer && nom !== 'selection' && objet !== 'materiel'">
 				<span class="couleur rouge" />
 			</button>
-			<button type="button" class="option jaune" :title="$t('jaune')" :aria-label="$t('jaune')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffff00') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffff00'}" @click="modifierCouleur('#ffff00')" v-if="!outilGommer && nom !== 'selection'">
+			<button type="button" class="option jaune" :title="$t('jaune')" :aria-label="$t('jaune')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffff00') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#ffff00'}" @click="modifierCouleur('#ffff00')" v-if="!outilGommer && nom !== 'selection' && objet !== 'materiel'">
 				<span class="couleur jaune" />
 			</button>
-			<button type="button" class="option vert" :title="$t('vert')" :aria-label="$t('vert')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#00ff00') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#00ff00'}" @click="modifierCouleur('#00ff00')" v-if="!outilGommer && nom !== 'selection'">
+			<button type="button" class="option vert" :title="$t('vert')" :aria-label="$t('vert')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#00ff00') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#00ff00'}" @click="modifierCouleur('#00ff00')" v-if="!outilGommer && nom !== 'selection' && objet !== 'materiel'">
 				<span class="couleur vert" />
 			</button>
-			<button type="button" class="option bleu" :title="$t('bleu')" :aria-label="$t('bleu')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#04fdff') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#04fdff'}" @click="modifierCouleur('#04fdff')" v-if="!outilGommer && nom !== 'selection'">
+			<button type="button" class="option bleu" :title="$t('bleu')" :aria-label="$t('bleu')" :aria-pressed="((outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#04fdff') ? 'true' : 'false'" :class="{'actif': (outilDessiner || outilZirkel || outilRemplir) && couleurStylo === '#04fdff'}" @click="modifierCouleur('#04fdff')" v-if="!outilGommer && nom !== 'selection' && objet !== 'materiel'">
 				<span class="couleur bleu" />
 			</button>
-			<span class="option icone" v-if="!outilGommer && nom !== 'selection'" @click="definirCouleur">
+			<span class="option icone" v-if="!outilGommer && nom !== 'selection' && objet !== 'materiel'" @click="definirCouleur">
 				<label for="couleur-annotation" :title="$t('selectionnerCouleur')"><i class="material-icons" aria-hidden="true">colorize</i></label>
 				<input id="couleur-annotation" type="color" tabindex="0" :aria-label="$t('selectionnerCouleur')" :value="couleurSelecteur">
 			</span>
@@ -285,6 +327,22 @@
 				</div>
 			</div>
 		</div>
+		<div id="materiel-palette" key="materiel" :style="materielStylePalette" v-if="materielMenu" role="dialog" :aria-label="materielMenu === 'geld' ? $t('rechengeld') : $t('dienes')">
+			<div class="materiel-kopf">
+				<span>{{ materielMenu === 'geld' ? $t('rechengeld') : $t('dienes') }}</span>
+				<button type="button" :title="$t('fermer')" :aria-label="$t('fermer')" @click="materielMenu = ''"><i class="material-icons" aria-hidden="true">close</i></button>
+			</div>
+			<div class="materiel-liste" :class="materielMenu">
+				<template v-for="e in materielListe" :key="e.motif">
+				<span class="materiel-trenner" v-if="e.motif === 'muenze-1ct'" />
+				<button type="button" class="materiel-teil" :title="titreMateriel(e)" :aria-label="titreMateriel(e)" @pointerdown="materielGesteDebut($event, e)" @keydown.enter.prevent="materielPlacer(e, dimensionsCanva.w / 2, dimensionsCanva.h / 2)" @keydown.space.prevent="materielPlacer(e, dimensionsCanva.w / 2, dimensionsCanva.h / 2)">
+					<img :src="e.src" alt="" draggable="false" :style="{ width: (materielMenu === 'dienes' ? Math.min(e.w, 64) * (e.w >= e.h ? 1 : e.w / e.h) : (e.motif.startsWith('schein') ? 64 : e.w * 0.58)) + 'px' }">
+				</button>
+				</template>
+			</div>
+			<p class="materiel-hinweis">{{ $t('materialHinweis') }}</p>
+		</div>
+		<img id="materiel-fantome" key="fantome" v-if="materielFantome" :src="materielFantome.src" alt="" :style="{ left: materielFantome.x + 'px', top: materielFantome.y + 'px', width: materielFantome.w + 'px', height: materielFantome.h + 'px' }">
 	</TransitionGroup>
 </template>
 
@@ -293,6 +351,9 @@ import zirkel from './annotation/zirkel.js'
 import gomme from './annotation/gomme.js'
 import textmarker from './annotation/textmarker.js'
 import regler from './annotation/regler.js'
+import materiel from './annotation/materiel.js'
+import lernuhr from './annotation/lernuhr.js'
+import '../assets/css/annotation-material.css'
 import werkzeugleiste from './annotation/werkzeugleiste.js'
 import geodreieck from './annotation/geodreieck.js'
 import remplir from './annotation/remplir.js'
@@ -306,7 +367,7 @@ const tailleMaxHistorique = 50
 export default {
 	name: 'CAnnotation',
 	inject: ['app'],
-	mixins: [zirkel, geodreieck, remplir, arrierePlan, gomme, werkzeugleiste, textmarker, regler],
+	mixins: [zirkel, geodreieck, remplir, arrierePlan, gomme, werkzeugleiste, textmarker, regler, materiel, lernuhr],
 	props: {
 		panneaux: { type: Array, required: true },
 		annotations: { type: Object, required: true },
@@ -708,7 +769,7 @@ export default {
 			const items = []
 			let nom, objet
 			JSON.parse(JSON.stringify(this.items)).forEach((item) => {
-				if (item.name.includes(this.nom)) {
+				if (item.name === this.nom || item.name.startsWith('ancr_' + this.nom + '_')) {
 					items.push(item)
 				}
 			})
@@ -744,11 +805,9 @@ export default {
 		supprimer () {
 			const type = this.nom.substring(0, 4)
 			const nom = this.nom
-			if (type === 'ancr') {
-				this.items = this.items.filter(r => !r.name.includes(nom.split('_')[1]))
-			} else {
-				this.items = this.items.filter(r => !r.name.includes(nom))
-			}
+			// Genaue Namen vergleichen: „rect1“ darf nicht auch „rect12“ löschen
+			const basis = type === 'ancr' ? nom.split('_')[1] : nom
+			this.items = this.items.filter(r => r.name !== basis && !r.name.startsWith('ancr_' + basis + '_'))
 			this.nom = ''
 			this.objet = ''
 			this.enregistrer()
@@ -1698,7 +1757,7 @@ export default {
 	margin: 0;
 	border-radius: 12px;
 	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
-	z-index: 10001;
+	z-index: 10003;
 	user-select: none;
 }
 

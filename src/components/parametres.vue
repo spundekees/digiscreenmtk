@@ -57,20 +57,11 @@
 						<button type="button" :title="$t('lineaturHaeuschen')" :aria-label="$t('lineaturHaeuschen')" @click="modifierFond('./static/img/lineatur-haeuschen.svg')">
 							<img src="@/assets/img/miniatures/lineatur-haeuschen.png" :alt="$t('lineaturHaeuschen')" style="border: 1px solid #ddd;">
 						</button>
-						<button type="button" :title="$t('lineaturHaeuschenGross')" :aria-label="$t('lineaturHaeuschenGross')" @click="modifierFond('./static/img/lineatur-haeuschen-gross.svg')">
-							<img src="@/assets/img/miniatures/lineatur-haeuschen-gross.png" :alt="$t('lineaturHaeuschenGross')" style="border: 1px solid #ddd;">
-						</button>
 						<button type="button" :title="$t('quadrillage')" :aria-label="$t('quadrillage')" @click="modifierFond('./static/img/quadrillage.png')">
 							<img src="@/assets/img/miniatures/quadrillage.png" :alt="$t('quadrillage')" style="border: 1px solid #ddd;">
 						</button>
-						<button type="button" :title="$t('quadrillageGrand')" :aria-label="$t('quadrillageGrand')" @click="modifierFond('./static/img/quadrillage-grand.png')">
-							<img src="@/assets/img/miniatures/quadrillage-grand.png" :alt="$t('quadrillageGrand')" style="border: 1px solid #ddd;">
-						</button>
 						<button type="button" :title="$t('quadrillageGris')" :aria-label="$t('quadrillageGris')" @click="modifierFond('./static/img/quadrillage-gris.png')">
 							<img src="@/assets/img/miniatures/quadrillage-gris.png" :alt="$t('quadrillageGris')" style="border: 1px solid #ddd;">
-						</button>
-						<button type="button" :title="$t('quadrillageGrisGrand')" :aria-label="$t('quadrillageGrisGrand')" @click="modifierFond('./static/img/quadrillage-gris-grand.png')">
-							<img src="@/assets/img/miniatures/quadrillage-gris-grand.png" :alt="$t('quadrillageGrisGrand')" style="border: 1px solid #ddd;">
 						</button>
 						<button type="button" :title="$t('partition')" :aria-label="$t('partition')" @click="modifierFond('./static/img/partition.png')">
 							<img src="@/assets/img/miniatures/partition.png" :alt="$t('partition')" style="border: 1px solid #ddd;">

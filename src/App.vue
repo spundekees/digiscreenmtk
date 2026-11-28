@@ -366,13 +366,17 @@
 		<MCorbeille :corbeille="corbeille" @retirer="retirerPanneauCorbeille" v-else-if="modale === 'corbeille'" />
 		<MParametres :admin="admin" v-if="menu" />
 
-		<div id="echelle-fond-direct" role="group" :aria-label="$t('echelleFond')" v-if="fondEcriture && !lectureSeule" :data-html2canvas-ignore="true">
-			<button type="button" :title="$t('echelleFondMoins')" :aria-label="$t('echelleFondMoins')" :disabled="echelleFond <= etapesEchelleFond[0]" @click="modifierEchelleFond(-1)"><i class="material-icons" aria-hidden="true">remove</i></button>
-			<button type="button" class="valeur" :title="$t('echelleFondReinitialiser')" :aria-label="$t('echelleFond') + ': ' + Math.round(echelleFond * 100) + ' %. ' + $t('echelleFondReinitialiser')" @click="modifierEchelleFond(0)">{{ Math.round(echelleFond * 100) }} %</button>
-			<button type="button" :title="$t('echelleFondPlus')" :aria-label="$t('echelleFondPlus')" :disabled="echelleFond >= etapesEchelleFond[etapesEchelleFond.length - 1]" @click="modifierEchelleFond(1)"><i class="material-icons" aria-hidden="true">add</i></button>
-			<span class="separateur" />
-			<button type="button" id="bouton-main-fond" :class="{'actif': deplacementFond}" :title="$t('fondVerschieben')" :aria-label="$t('fondVerschieben')" :aria-pressed="deplacementFond ? 'true' : 'false'" @click="basculerDeplacementFond"><i class="material-icons" aria-hidden="true">pan_tool</i></button>
-			<button type="button" id="bouton-centre-fond" :title="$t('fondZentrieren')" :aria-label="$t('fondZentrieren')" :disabled="decalageFond.x === 0 && decalageFond.y === 0" @click="recentrerFond"><i class="material-icons" aria-hidden="true">filter_center_focus</i></button>
+		<div id="echelle-fond-direct" role="group" :aria-label="$t('echelleFond')" v-if="!lectureSeule" :data-html2canvas-ignore="true">
+			<template v-if="fondEcriture">
+				<button type="button" :title="$t('echelleFondMoins')" :aria-label="$t('echelleFondMoins')" :disabled="echelleFond <= etapesEchelleFond[0]" @click="modifierEchelleFond(-1)"><i class="material-icons" aria-hidden="true">remove</i></button>
+				<button type="button" class="valeur" :title="$t('echelleFondReinitialiser')" :aria-label="$t('echelleFond') + ': ' + Math.round(echelleFond * 100) + ' %. ' + $t('echelleFondReinitialiser')" @click="modifierEchelleFond(0)">{{ Math.round(echelleFond * 100) }} %</button>
+				<button type="button" :title="$t('echelleFondPlus')" :aria-label="$t('echelleFondPlus')" :disabled="echelleFond >= etapesEchelleFond[etapesEchelleFond.length - 1]" @click="modifierEchelleFond(1)"><i class="material-icons" aria-hidden="true">add</i></button>
+				<span class="separateur" />
+				<button type="button" id="bouton-main-fond" :class="{'actif': deplacementFond}" :title="$t('fondVerschieben')" :aria-label="$t('fondVerschieben')" :aria-pressed="deplacementFond ? 'true' : 'false'" @click="basculerDeplacementFond"><i class="material-icons" aria-hidden="true">pan_tool</i></button>
+				<button type="button" id="bouton-centre-fond" :title="$t('fondZentrieren')" :aria-label="$t('fondZentrieren')" :disabled="decalageFond.x === 0 && decalageFond.y === 0" @click="recentrerFond"><i class="material-icons" aria-hidden="true">filter_center_focus</i></button>
+				<span class="separateur" />
+			</template>
+			<button type="button" id="bouton-plein-ecran-haut" :title="pleinEcran ? $t('sortirPleinEcran') : $t('mettrePleinEcran')" :aria-label="pleinEcran ? $t('sortirPleinEcran') : $t('mettrePleinEcran')" @click="pleinEcran ? sortirPleinEcran() : entrerPleinEcran()"><i class="material-icons" aria-hidden="true">{{ pleinEcran ? 'close_fullscreen' : 'open_in_full' }}</i></button>
 		</div>
 
 		<div id="surface-deplacement-fond" v-if="deplacementFond && fondEcriture && !lectureSeule" :data-html2canvas-ignore="true" @pointerdown="debutDeplacementFond" />
@@ -394,6 +398,7 @@
 
 <script>
 import echelonnerAnnotations, { deplacerAnnotations } from './echelleAnnotations.js'
+import { istBlatt, blattBreite, pivotFond } from './blatt.js'
 import PCodeqr from '@/components/codeqr.vue'
 import PTexte from '@/components/texte.vue'
 import PSeyes from '@/components/seyes.vue'
@@ -614,6 +619,14 @@ export default {
 			const centre = 'calc(50% + ' + d.x + 'px) calc(50% + ' + d.y + 'px)'
 			if (this.fond.substring(0, 1) === '#') {
 				return { 'background-color': this.fond }
+			} else if (istBlatt(this.fond)) {
+				// Blatt mit fester Breite: Rand links und rechts, Muster beginnt am linken Blattrand, nur senkrecht verschiebbar
+				const b = blattBreite(this.largeur || window.innerWidth)
+				const l = 'calc(50% - ' + (b / 2) + 'px)'
+				const r = 'calc(50% + ' + (b / 2) + 'px)'
+				const rand = 'linear-gradient(to right, #dde3e5 0, #dde3e5 calc(50% - ' + (b / 2 + 1) + 'px), #b9c4c8 calc(50% - ' + (b / 2 + 1) + 'px), #b9c4c8 ' + l + ', transparent ' + l + ', transparent ' + r + ', #b9c4c8 ' + r + ', #b9c4c8 calc(50% + ' + (b / 2 + 1) + 'px), #dde3e5 calc(50% + ' + (b / 2 + 1) + 'px), #dde3e5 100%)'
+				const y = this.fond.includes('/img/lineatur-haeuschen') ? d.y + 'px' : 'calc(50% + ' + d.y + 'px)'
+				return { 'background-color': '#ffffff', 'background-image': rand + ', ' + image, 'background-size': '100% 100%, ' + taille, 'background-repeat': 'no-repeat, repeat', 'background-position': '0 0, ' + l + ' ' + y }
 			} else if (this.fond.includes('/img/partition.png')) {
 				return { 'background-image': image, 'background-size': e === 1 ? 'contain' : 'auto ' + (100 * e) + '%', 'background-repeat': 'repeat', 'background-position': centre }
 			} else if (this.fond.includes('/img/lineatur-haeuschen')) {
@@ -649,6 +662,13 @@ export default {
 		},
 		importDonnees (valeur) {
 			if (valeur) this.annoncer(this.$t('chargementEnCours'))
+		},
+		fond (valeur) {
+			// Auf ein Blatt gewechselt: seitliche Verschiebung zurücknehmen (Blatt ist nur senkrecht verschiebbar)
+			const d = this.decalageFond
+			if (istBlatt(valeur) && d.x !== 0) {
+				this.$nextTick(() => this.deplacerFondDe(-d.x, 0))
+			}
 		},
 		fondEcriture (valeur) {
 			if (!valeur) {
@@ -1273,6 +1293,13 @@ export default {
 			if (!page || (dx === 0 && dy === 0)) {
 				return
 			}
+			if (istBlatt(page.fond) && dx !== 0 && (page.decalageFond || { x: 0 }).x === 0) {
+				// Blatt: nur nach oben/unten verschieben
+				dx = 0
+				if (dy === 0) {
+					return
+				}
+			}
 			const d = page.decalageFond || { x: 0, y: 0 }
 			page.decalageFond = { x: d.x + dx, y: d.y + dy }
 			// Ist das Annotieren geschlossen, die gespeicherten Objekte hier mitverschieben (sonst übernimmt das die Annotation selbst)
@@ -1327,9 +1354,8 @@ export default {
 				const main = document.querySelector('main')
 				const w = main ? main.clientWidth : window.innerWidth
 				const h = main ? main.clientHeight : window.innerHeight
-				const lineatur = this.fond.includes('/img/lineatur-haeuschen')
-				const d = this.decalageFond
-				echelonnerAnnotations(page.annotations.items, nouvelle / ancienne, (lineatur ? 0 : w / 2) + d.x, (lineatur ? 0 : h / 2) + d.y)
+				const p = pivotFond(this.fond, w, h, this.decalageFond)
+				echelonnerAnnotations(page.annotations.items, nouvelle / ancienne, p.x, p.y)
 			}
 			page.echelleFond = nouvelle
 		},

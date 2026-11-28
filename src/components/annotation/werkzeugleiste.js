@@ -1,5 +1,9 @@
-// Annotations-Werkzeugleiste: zwei- bzw. dreispaltig, frei verschiebbar (Medienzentrum MTK)
+// Annotations-Werkzeugleiste: zweispaltig, frei verschiebbar; am unteren Rand waagrecht (Medienzentrum MTK)
 const CLE = 'digiscreen_werkzeugleiste'
+// Oberkante: Platz für die Optionsleiste (Farben, Regler) und den Zoom oben, damit der Griff immer erreichbar bleibt
+const HAUT_MIN = 52
+// Abstand des Zeigers vom unteren Rand, ab dem sich die Leiste waagrecht legt
+const ZONE_BAS = 36
 
 export default {
 	data () {
@@ -73,7 +77,8 @@ export default {
 			const maxX = Math.max(0, window.innerWidth - element.offsetWidth)
 			const maxY = Math.max(0, this.outilsBasLibre() - element.offsetHeight)
 			const x = Math.round(Math.min(Math.max(0, this.outilsPosition.x), maxX))
-			const y = Math.round(Math.min(Math.max(0, this.outilsPosition.y), maxY))
+			const minY = this.outilsWaagrecht ? 0 : Math.min(HAUT_MIN, maxY)
+			const y = Math.round(Math.min(Math.max(minY, this.outilsPosition.y), maxY))
 			if (x !== this.outilsPosition.x || y !== this.outilsPosition.y) {
 				this.outilsPosition = { x, y }
 			}
@@ -121,8 +126,10 @@ export default {
 				return
 			}
 			const y = event.clientY - this.outilsGeste.dy
-			if (y + element.offsetHeight >= bas - 20) {
-				// Unteren Rand (fast) berührt: Leiste waagrecht in eine Zeile legen
+			if (event.clientY >= bas - ZONE_BAS) {
+				// Zeiger am unteren Rand: Leiste waagrecht in eine Zeile legen.
+				// (Nur der Zeiger zählt, nicht die Unterkante der Leiste – sonst ließe sich die hohe Leiste
+				// kaum in die untere Bildschirmhälfte schieben.)
 				this.outilsBasculer(true, event)
 				return
 			}
@@ -148,9 +155,9 @@ export default {
 					this.outilsGeste.dy = rectGriff ? (rectGriff.top - rect.top) + rectGriff.height / 2 : 10
 					this.outilsGeste.refY = event.clientY
 				} else {
-					// Senkrecht mit Abstand zum Rand aufstellen, damit sie nicht sofort wieder umklappt
-					y = Math.max(0, Math.min(event.clientY - 8, bas - element.offsetHeight - 60))
-					this.outilsGeste.dy = event.clientY - y
+					// Senkrecht aufstellen, Griff unter dem Zeiger (oben begrenzt durch outilsBegrenzer)
+					this.outilsGeste.dy = rectGriff ? (rectGriff.top - rect.top) + rectGriff.height / 2 : 10
+					y = event.clientY - this.outilsGeste.dy
 				}
 				this.outilsPosition = { x: event.clientX - this.outilsGeste.dx, y }
 				this.outilsBegrenzer(false)
