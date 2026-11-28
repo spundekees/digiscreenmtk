@@ -215,39 +215,17 @@
 				<input id="couleur-annotation" type="color" tabindex="0" :aria-label="$t('selectionnerCouleur')" :value="couleurSelecteur">
 			</span>
 			<span class="separateur" v-if="outilDessiner || outilZirkel || outilRemplir" />
-			<span class="option label-epaisseur" v-if="outilDessiner || outilZirkel || outilGommer">
-				<span><i class="material-icons" aria-hidden="true">line_weight</i></span>
-			</span>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 2 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 2 })" :aria-pressed="(epaisseurActive === 2) ? 'true' : 'false'" :class="{'actif': epaisseurActive === 2}" @click="modifierEpaisseur(2)" v-if="outilDessiner || outilZirkel || outilGommer">
-				<span>2</span>
-			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 5 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 5 })" :aria-pressed="(epaisseurActive === 5) ? 'true' : 'false'" :class="{'actif': epaisseurActive === 5}" @click="modifierEpaisseur(5)" v-if="outilDessiner || outilZirkel || outilGommer">
-				<span>5</span>
-			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 10 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 10 })" :aria-pressed="(epaisseurActive === 10) ? 'true' : 'false'" :class="{'actif': epaisseurActive === 10}" @click="modifierEpaisseur(10)" v-if="outilDessiner || outilZirkel || outilGommer">
-				<span>10</span>
-			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 20 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 20 })" :aria-pressed="(epaisseurActive === 20) ? 'true' : 'false'" :class="{'actif': epaisseurActive === 20}" @click="modifierEpaisseur(20)" v-if="outilDessiner || outilZirkel || outilGommer">
-				<span>20</span>
-			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 40 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 40 })" :aria-pressed="(epaisseurActive === 40) ? 'true' : 'false'" :class="{'actif': epaisseurActive === 40}" @click="modifierEpaisseur(40)" v-if="outilDessiner || outilZirkel || outilGommer">
-				<span>40</span>
-			</button>
-			<button type="button" class="option epaisseur" :title="$t('modifierEpaisseur', { epaisseur: 80 })" :aria-label="$t('modifierEpaisseur', { epaisseur: 80 })" :aria-pressed="(epaisseurActive === 80) ? 'true' : 'false'" :class="{'actif': epaisseurActive === 80}" @click="modifierEpaisseur(80)" v-if="outilDessiner || outilZirkel || outilGommer">
-				<span>80</span>
-			</button>
-			<span class="option label-transparence" v-if="outilDessiner || outilZirkel || outilRemplir">
-				<span><i class="material-icons" aria-hidden="true">opacity</i></span>
-			</span>
-			<button type="button" class="option transparence" :title="$t('modifierOpacite', { opacite: 0.4 })" :aria-label="$t('modifierOpacite', { opacite: 0.4 })" :aria-pressed="(transparenceStylo === 0.4) ? 'true' : 'false'" :class="{'actif': transparenceStylo === 0.4}" v-if="outilDessiner || outilZirkel || outilRemplir" @click="modifierTransparence(0.4)">
-				<span>0.4</span>
-			</button>
-			<button type="button" class="option transparence" :title="$t('modifierOpacite', { opacite: 0.6 })" :aria-label="$t('modifierOpacite', { opacite: 0.6 })" :aria-pressed="(transparenceStylo === 0.6) ? 'true' : 'false'" :class="{'actif': transparenceStylo === 0.6}" v-if="outilDessiner || outilZirkel || outilRemplir" @click="modifierTransparence(0.6)">
-				<span>0.6</span>
-			</button>
-			<button type="button" class="option transparence" :title="$t('modifierOpacite', { opacite: 1 })" :aria-label="$t('modifierOpacite', { opacite: 1 })" :aria-pressed="(transparenceStylo === 1) ? 'true' : 'false'" :class="{'actif': transparenceStylo === 1}" v-if="outilDessiner || outilZirkel || outilRemplir" @click="modifierTransparence(1)">
-				<span>1</span>
-			</button>
+			<label class="option regler" v-if="outilDessiner || outilZirkel || outilGommer" :title="$t('strichstaerke')">
+				<i class="material-icons" aria-hidden="true">line_weight</i>
+				<input type="range" min="0" max="100" step="1" :value="reglerStaerke" :style="{ '--fuellung': reglerStaerke + '%' }" :aria-label="$t('strichstaerke')" :aria-valuetext="epaisseurActive + ' px'" @input="reglerStaerkeGeaendert">
+				<span class="regler-wert">{{ epaisseurActive }}</span>
+				<span class="regler-vorschau" aria-hidden="true"><span :style="vorschauStrich" /></span>
+			</label>
+			<label class="option regler" v-if="outilDessiner || outilZirkel || outilRemplir" :title="$t('deckkraft')">
+				<i class="material-icons" aria-hidden="true">opacity</i>
+				<input type="range" min="10" max="100" step="5" :value="deckkraftProzent" :style="{ '--fuellung': ((deckkraftProzent - 10) / 0.9) + '%' }" :aria-label="$t('deckkraft')" :aria-valuetext="deckkraftProzent + ' %'" @input="reglerDeckkraftGeaendert">
+				<span class="regler-wert">{{ deckkraftProzent }}&nbsp;%</span>
+			</label>
 			<span class="separateur" v-if="outilSelectionner && nom !== 'selection'" />
 			<span class="option label-transparence" v-if="outilSelectionner && nom !== 'selection' && (objet === 'rectangle-plein' || objet === 'cercle-plein')">
 				<span><i class="material-icons" aria-hidden="true">opacity</i></span>
@@ -314,6 +292,7 @@
 import zirkel from './annotation/zirkel.js'
 import gomme from './annotation/gomme.js'
 import textmarker from './annotation/textmarker.js'
+import regler from './annotation/regler.js'
 import werkzeugleiste from './annotation/werkzeugleiste.js'
 import geodreieck from './annotation/geodreieck.js'
 import remplir from './annotation/remplir.js'
@@ -327,7 +306,7 @@ const tailleMaxHistorique = 50
 export default {
 	name: 'CAnnotation',
 	inject: ['app'],
-	mixins: [zirkel, geodreieck, remplir, arrierePlan, gomme, werkzeugleiste, textmarker],
+	mixins: [zirkel, geodreieck, remplir, arrierePlan, gomme, werkzeugleiste, textmarker, regler],
 	props: {
 		panneaux: { type: Array, required: true },
 		annotations: { type: Object, required: true },
@@ -1858,6 +1837,103 @@ export default {
 	font-size: 24px;
 	width: auto;
 	cursor: default;
+}
+
+#options .option.regler {
+	width: auto;
+	height: 30px;
+	gap: 6px;
+	margin: 0 8px;
+	cursor: default;
+}
+
+#options .option.regler .material-icons {
+	font-size: 22px;
+}
+
+#options .option.regler input[type="range"] {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 110px;
+	height: 6px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 3px;
+	background: linear-gradient(to right, #00ced1 var(--fuellung, 50%), #d5dfe1 var(--fuellung, 50%));
+	cursor: pointer;
+	touch-action: none;
+	outline: none;
+}
+
+#options .option.regler input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 18px;
+	height: 18px;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	background: #00a3a6;
+	box-shadow: 0 0 0 1px #00a3a6, 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+#options .option.regler input[type="range"]::-moz-range-thumb {
+	width: 18px;
+	height: 18px;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	background: #00a3a6;
+	box-shadow: 0 0 0 1px #00a3a6, 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+#options .option.regler input[type="range"]::-moz-range-track {
+	height: 6px;
+	border-radius: 3px;
+	background: transparent;
+}
+
+#options .option.regler input[type="range"]:focus-visible {
+	outline: 2px solid #00707a;
+	outline-offset: 4px;
+}
+
+#options .option.regler .regler-wert {
+	min-width: 36px;
+	font-size: 12px;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+#options .option.regler .regler-vorschau {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #fff;
+}
+
+#options .option.regler .regler-vorschau span {
+	display: block;
+	border-radius: 50%;
+}
+
+@media (pointer: coarse) {
+	#options .option.regler input[type="range"] {
+		width: 140px;
+	}
+
+	#options .option.regler input[type="range"]::-webkit-slider-thumb {
+		width: 26px;
+		height: 26px;
+	}
+
+	#options .option.regler input[type="range"]::-moz-range-thumb {
+		width: 26px;
+		height: 26px;
+	}
 }
 
 #options .option.transparence,

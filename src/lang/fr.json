@@ -360,6 +360,8 @@
 	"zirkelEinrastenAus": "Placement libre – cliquer pour aimanter",
 	"geodreieck": "Équerre",
 	"gomme": "Gomme",
+	"strichstaerke": "Épaisseur du trait",
+	"deckkraft": "Opacité",
 	"info_codeqr": "Afficher un lien en QR code",
 	"info_texte": "Écrire et mettre en forme du texte",
 	"info_seyes": "Écrire sur lignage Seyes",
