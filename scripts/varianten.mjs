@@ -86,7 +86,7 @@ writeFileSync(join(lokal, 'ANLEITUNG.txt'), [
 	'Die Grundfunktionen laufen ohne Internet. Einige Module (z. B. Bildersuche,',
 	'Videos, Einbettungen) brauchen weiterhin eine Internetverbindung.',
 	'',
-	'Online-Version: https://spundekees.github.io/digiscreenmtk/',
+	'Online-Version: https://digiscreen-mtk.de/',
 	'Quellcode und Lizenz (GNU AGPLv3): https://github.com/spundekees/digiscreenmtk',
 	''
 ].join('\r\n'))
