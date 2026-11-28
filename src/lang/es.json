@@ -360,6 +360,8 @@
 	"zirkelEinrastenAus": "Colocación libre – clic para ajustar",
 	"geodreieck": "Escuadra",
 	"gomme": "Borrador",
+	"strichstaerke": "Grosor del trazo",
+	"deckkraft": "Opacidad",
 	"info_codeqr": "Mostrar un enlace como código QR",
 	"info_texte": "Escribir y dar formato a texto",
 	"info_seyes": "Escribir en pauta Seyes",
