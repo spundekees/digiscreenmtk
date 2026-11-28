@@ -5,7 +5,7 @@ name: Digiscreen bauen und veröffentlichen
 
 on:
   push:
-    branches: [main]
+    branches: [entwicklung]
   workflow_dispatch:
 
 permissions:
