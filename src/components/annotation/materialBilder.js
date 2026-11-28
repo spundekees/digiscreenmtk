@@ -95,37 +95,51 @@ function muenze (m) {
 }
 
 // ---------- Dienes-Material ----------
-const U = 16 // Kantenlänge eines Einerwürfels in px
-const TIEFE = 0.5 // schräge Tiefe je Einheit (Schrägbild)
+// Leichte Zentralperspektive (Fluchtpunkt oben rechts): Kanten nach hinten laufen zusammen,
+// statt wie beim Schrägbild optisch auseinanderzugehen.
+const U = 16 // Kantenlänge eines Einerwürfels in px (Vorderseite)
+const NEIGUNG = 0.42 // Versatz je Einheit Tiefe an der Vorderkante
+const FLUCHT = 0.012 // Verkleinerung nach hinten je Einheit Tiefe
 const HOLZ = { vorne: '#f3d49a', oben: '#f9e6c1', seite: '#ddb36d', linie: '#9a6b2c' }
 
 function dienes (b, h, t) {
-	const o = U * TIEFE * t
+	// Fluchtpunkt relativ zur Mitte der Vorderseite
+	const vx = b * U / 2 + NEIGUNG * U / FLUCHT
+	const vy = h * U / 2 - NEIGUNG * U / FLUCHT
+	const proj = (x, y, z) => {
+		const s = 1 / (1 + FLUCHT * z)
+		return [vx + (x * U - vx) * s, vy + (y * U - vy) * s]
+	}
+	const ecken = [proj(0, 0, 0), proj(b, h, 0), proj(0, 0, t), proj(b, 0, t), proj(b, h, t)]
 	const pad = 2
-	const w = Math.ceil(b * U + o + 2 * pad)
-	const hh = Math.ceil(h * U + o + 2 * pad)
-	const fx = pad
-	const fy = pad + o
-	const fw = b * U
-	const fh = h * U
-	const p = (pts) => pts.map((q) => r(q[0]) + ',' + r(q[1])).join(' ')
+	const minX = Math.min(...ecken.map((e) => e[0]))
+	const minY = Math.min(...ecken.map((e) => e[1]))
+	const maxX = Math.max(...ecken.map((e) => e[0]))
+	const maxY = Math.max(...ecken.map((e) => e[1]))
+	const P = (x, y, z) => {
+		const q = proj(x, y, z)
+		return [q[0] - minX + pad, q[1] - minY + pad]
+	}
+	const w = Math.ceil(maxX - minX + 2 * pad)
+	const hh = Math.ceil(maxY - minY + 2 * pad)
+	const pts = (liste) => liste.map((q) => r(q[0]) + ',' + r(q[1])).join(' ')
 	const trait = 'stroke="' + HOLZ.linie + '" stroke-width="0.9"'
+	const ligne = (a, c) => '<line x1="' + r(a[0]) + '" y1="' + r(a[1]) + '" x2="' + r(c[0]) + '" y2="' + r(c[1]) + '" ' + trait + '/>'
 	let lignes = ''
 	// Vorderseite
-	for (let i = 1; i < b; i++) lignes += '<line x1="' + r(fx + i * U) + '" y1="' + r(fy) + '" x2="' + r(fx + i * U) + '" y2="' + r(fy + fh) + '" ' + trait + '/>'
-	for (let j = 1; j < h; j++) lignes += '<line x1="' + r(fx) + '" y1="' + r(fy + j * U) + '" x2="' + r(fx + fw) + '" y2="' + r(fy + j * U) + '" ' + trait + '/>'
+	for (let i = 1; i < b; i++) lignes += ligne(P(i, 0, 0), P(i, h, 0))
+	for (let j = 1; j < h; j++) lignes += ligne(P(0, j, 0), P(b, j, 0))
 	// Oberseite
-	const e = U * TIEFE
-	for (let i = 1; i < b; i++) lignes += '<line x1="' + r(fx + i * U) + '" y1="' + r(fy) + '" x2="' + r(fx + i * U + o) + '" y2="' + r(fy - o) + '" ' + trait + '/>'
-	for (let k = 1; k < t; k++) lignes += '<line x1="' + r(fx + k * e) + '" y1="' + r(fy - k * e) + '" x2="' + r(fx + fw + k * e) + '" y2="' + r(fy - k * e) + '" ' + trait + '/>'
+	for (let i = 1; i < b; i++) lignes += ligne(P(i, 0, 0), P(i, 0, t))
+	for (let k = 1; k < t; k++) lignes += ligne(P(0, 0, k), P(b, 0, k))
 	// rechte Seite
-	for (let j = 1; j < h; j++) lignes += '<line x1="' + r(fx + fw) + '" y1="' + r(fy + j * U) + '" x2="' + r(fx + fw + o) + '" y2="' + r(fy + j * U - o) + '" ' + trait + '/>'
-	for (let k = 1; k < t; k++) lignes += '<line x1="' + r(fx + fw + k * e) + '" y1="' + r(fy - k * e) + '" x2="' + r(fx + fw + k * e) + '" y2="' + r(fy + fh - k * e) + '" ' + trait + '/>'
+	for (let j = 1; j < h; j++) lignes += ligne(P(b, j, 0), P(b, j, t))
+	for (let k = 1; k < t; k++) lignes += ligne(P(b, 0, k), P(b, h, k))
 	const bord = 'stroke="' + HOLZ.linie + '" stroke-width="1.4" stroke-linejoin="round"'
 	const inhalt =
-		'<polygon points="' + p([[fx, fy], [fx + fw, fy], [fx + fw + o, fy - o], [fx + o, fy - o]]) + '" fill="' + HOLZ.oben + '" ' + bord + '/>' +
-		'<polygon points="' + p([[fx + fw, fy], [fx + fw + o, fy - o], [fx + fw + o, fy + fh - o], [fx + fw, fy + fh]]) + '" fill="' + HOLZ.seite + '" ' + bord + '/>' +
-		'<rect x="' + r(fx) + '" y="' + r(fy) + '" width="' + r(fw) + '" height="' + r(fh) + '" fill="' + HOLZ.vorne + '" ' + bord + '/>' +
+		'<polygon points="' + pts([P(0, 0, 0), P(b, 0, 0), P(b, 0, t), P(0, 0, t)]) + '" fill="' + HOLZ.oben + '" ' + bord + '/>' +
+		'<polygon points="' + pts([P(b, 0, 0), P(b, 0, t), P(b, h, t), P(b, h, 0)]) + '" fill="' + HOLZ.seite + '" ' + bord + '/>' +
+		'<polygon points="' + pts([P(0, 0, 0), P(b, 0, 0), P(b, h, 0), P(0, h, 0)]) + '" fill="' + HOLZ.vorne + '" ' + bord + '/>' +
 		lignes
 	return { svg: svg(w, hh, inhalt), w, h: hh }
 }
