@@ -1,7 +1,8 @@
-// Lernuhr für die Annotation (Medienzentrum MTK):
-// Ziffern 1–12, darunter klein und rot 13–0 (ausblendbar), Stunden- und Minutenzeiger sind gekoppelt
-// („geared“): Wird der Minutenzeiger gedreht, läuft der Stundenzeiger passend mit und umgekehrt.
-const CLE = 'digiscreen_lernuhr'
+// Lernuhren für die Annotation (Medienzentrum MTK):
+// Ziffern 1–12, darunter klein und rot 13–0 (je Uhr ausblendbar). Stunden- und Minutenzeiger sind
+// gekoppelt („geared“): Wird der Minutenzeiger gedreht, läuft der Stundenzeiger passend mit und umgekehrt.
+// Jede Uhr ist ein Annotations-Objekt (objet 'uhr'): beliebig viele, mit der Tafel gespeichert,
+// Rückgängig/Wiederholen, Verschieben und Skalieren mit dem Hintergrund.
 
 function normaliser (a) {
 	// Winkeldifferenz auf (-180, 180]
@@ -11,21 +12,29 @@ function normaliser (a) {
 	return d
 }
 
+const dessins = {}
+
 export default {
 	data () {
-		let etat = null
-		try {
-			etat = JSON.parse(localStorage.getItem(CLE) || 'null')
-		} catch {}
 		return {
-			uhrVisible: false,
-			uhr: etat && etat.r > 0 ? { x: etat.x, y: etat.y, r: etat.r, m: etat.m || 0, mit24: etat.mit24 !== false } : { x: 0, y: 0, r: 150, m: 10 * 60 + 10, mit24: true },
 			uhrGeste: null
 		}
 	},
 	computed: {
-		uhrDessin () {
-			const r = this.uhr.r
+		uhren () {
+			return this.items.filter((item) => item && item.objet === 'uhr')
+		}
+	},
+	beforeUnmount () {
+		this.uhrGesteFin()
+	},
+	methods: {
+		uhrDessin (rayon) {
+			// Ziffernblatt einmal je Größe berechnen
+			const r = Math.round(rayon)
+			if (dessins[r]) {
+				return dessins[r]
+			}
 			let striche = ''
 			let dicke = ''
 			for (let i = 0; i < 60; i++) {
@@ -47,60 +56,60 @@ export default {
 				zahlen.push({ t: String(h), x: Math.sin(a) * r * 0.74, y: -Math.cos(a) * r * 0.74 })
 				rot.push({ t: String(h === 12 ? 0 : h + 12), x: Math.sin(a) * r * 0.53, y: -Math.cos(a) * r * 0.53 })
 			}
-			return { striche, dicke, zahlen, rot }
+			dessins[r] = { striche, dicke, zahlen, rot }
+			return dessins[r]
 		},
-		uhrMinuten () {
-			return ((Math.round(this.uhr.m) % 720) + 720) % 720
+		uhrWinkelMinute (u) {
+			return (u.m % 60) * 6
 		},
-		uhrWinkelMinute () {
-			return (this.uhr.m % 60) * 6
+		uhrWinkelStunde (u) {
+			return (u.m % 720) / 2
 		},
-		uhrWinkelStunde () {
-			return (this.uhr.m % 720) / 2
+		uhrTexte (u) {
+			const minuten = ((Math.round(u.m) % 720) + 720) % 720
+			const h = Math.floor(minuten / 60)
+			return (h === 0 ? 12 : h) + ':' + String(minuten % 60).padStart(2, '0')
 		},
-		uhrTexte () {
-			const h = Math.floor(this.uhrMinuten / 60)
-			const m = this.uhrMinuten % 60
-			return (h === 0 ? 12 : h) + ':' + String(m).padStart(2, '0')
-		}
-	},
-	methods: {
-		basculerUhr () {
-			if (this.uhrVisible) {
-				this.uhrVisible = false
-				return
-			}
+		uhrHinzufuegen () {
+			// Neue Uhr in die Mitte (jede weitere etwas versetzt), Zeit = aktuelle Uhrzeit
 			const w = this.dimensionsCanva.w || window.innerWidth
 			const h = this.dimensionsCanva.h || window.innerHeight
-			// Erste Nutzung oder Uhr außerhalb der Fläche: in die Mitte
-			if (!this.uhr.x || this.uhr.x < 0 || this.uhr.y < 0 || this.uhr.x > w || this.uhr.y > h) {
-				this.uhr.r = Math.min(this.uhr.r, Math.max(60, Math.min(w, h) * 0.3))
-				this.uhr.x = w / 2
-				this.uhr.y = h / 2
+			const r = Math.round(Math.max(80, Math.min(170, Math.min(w, h) * 0.22)))
+			const versatz = (this.uhren.length % 4) * Math.round(r * 0.6)
+			const jetzt = new Date()
+			this.id++
+			this.items.push({ name: 'uhr_' + this.id, objet: 'uhr', x: Math.round(w / 2 + versatz), y: Math.round(h / 2 + versatz), r: r, m: jetzt.getHours() * 60 + jetzt.getMinutes(), mit24: true })
+			this.enregistrer()
+		},
+		uhrEntfernen (u) {
+			this.items = this.items.filter((item) => item !== u && item.name !== u.name)
+			this.enregistrer()
+		},
+		uhrUmschalten24 (u) {
+			u.mit24 = !u.mit24
+			this.enregistrer()
+		},
+		uhrWinkel (u, p) {
+			// Winkel in Grad, 0 = 12 Uhr, im Uhrzeigersinn
+			return (Math.atan2(p.x - u.x, -(p.y - u.y)) * 180 / Math.PI + 360) % 360
+		},
+		uhrNachVorne (u) {
+			// Angefasste Uhr nach vorne holen
+			const i = this.items.indexOf(u)
+			if (i > -1 && i !== this.items.length - 1) {
+				this.items.splice(i, 1)
+				this.items.push(u)
 			}
-			this.uhrVisible = true
 		},
-		uhrSpeichern () {
-			try {
-				localStorage.setItem(CLE, JSON.stringify({ x: Math.round(this.uhr.x), y: Math.round(this.uhr.y), r: Math.round(this.uhr.r), m: Math.round(this.uhr.m), mit24: this.uhr.mit24 }))
-			} catch {}
-		},
-		uhrUmschalten24 () {
-			this.uhr.mit24 = !this.uhr.mit24
-			this.uhrSpeichern()
-		},
-		uhrWinkel (p) {
-			// Winkel des Zeigers in Grad, 0 = 12 Uhr, im Uhrzeigersinn
-			return (Math.atan2(p.x - this.uhr.x, -(p.y - this.uhr.y)) * 180 / Math.PI + 360) % 360
-		},
-		uhrGesteDebut (event, mode) {
+		uhrGesteDebut (event, u, mode) {
 			if (event.button !== undefined && event.button > 0) {
 				return
 			}
 			event.preventDefault()
 			event.stopPropagation()
 			const p = this.zirkelPosition(event)
-			this.uhrGeste = { mode, id: event.pointerId, ox: this.uhr.x - p.x, oy: this.uhr.y - p.y, a: this.uhrWinkel(p), r0: this.uhr.r, d0: Math.hypot(p.x - this.uhr.x, p.y - this.uhr.y) }
+			this.uhrNachVorne(u)
+			this.uhrGeste = { u, mode, id: event.pointerId, ox: u.x - p.x, oy: u.y - p.y, a: this.uhrWinkel(u, p), r0: u.r, d0: Math.hypot(p.x - u.x, p.y - u.y), bouge: false }
 			window.addEventListener('pointermove', this.uhrGesteMouvement)
 			window.addEventListener('pointerup', this.uhrGesteFin)
 			window.addEventListener('pointercancel', this.uhrGesteFin)
@@ -111,19 +120,21 @@ export default {
 				return
 			}
 			event.preventDefault()
+			g.bouge = true
+			const u = g.u
 			const p = this.zirkelPosition(event)
 			if (g.mode === 'deplacer') {
-				this.uhr.x = p.x + g.ox
-				this.uhr.y = p.y + g.oy
+				u.x = p.x + g.ox
+				u.y = p.y + g.oy
 			} else if (g.mode === 'taille') {
-				const d = Math.hypot(p.x - this.uhr.x, p.y - this.uhr.y)
-				this.uhr.r = Math.min(Math.max(g.r0 * d / Math.max(g.d0, 1), 60), 1200)
+				const d = Math.hypot(p.x - u.x, p.y - u.y)
+				u.r = Math.min(Math.max(g.r0 * d / Math.max(g.d0, 1), 60), 1200)
 			} else {
-				// Zeiger drehen: Minutenzeiger = 60 min je Umdrehung, Stundenzeiger = 720 min je Umdrehung
-				const a = this.uhrWinkel(p)
+				// Minutenzeiger: 60 min je Umdrehung, Stundenzeiger: 720 min je Umdrehung
+				const a = this.uhrWinkel(u, p)
 				const delta = normaliser(a - g.a)
 				g.a = a
-				this.uhr.m = (this.uhr.m + delta / 360 * (g.mode === 'minute' ? 60 : 720) + 1440) % 1440
+				u.m = (u.m + delta / 360 * (g.mode === 'minute' ? 60 : 720) + 1440) % 1440
 			}
 		},
 		uhrGesteFin (event) {
@@ -134,25 +145,33 @@ export default {
 			window.removeEventListener('pointermove', this.uhrGesteMouvement)
 			window.removeEventListener('pointerup', this.uhrGesteFin)
 			window.removeEventListener('pointercancel', this.uhrGesteFin)
-			if (g && (g.mode === 'minute' || g.mode === 'stunde')) {
-				// Auf volle Minuten einrasten
-				this.uhr.m = Math.round(this.uhr.m) % 1440
-			}
 			this.uhrGeste = null
-			this.uhrSpeichern()
+			if (!g || !event) {
+				return
+			}
+			if (g.mode === 'minute' || g.mode === 'stunde') {
+				// Auf volle Minuten einrasten
+				g.u.m = Math.round(g.u.m) % 1440
+			}
+			g.u.x = Math.round(g.u.x)
+			g.u.y = Math.round(g.u.y)
+			g.u.r = Math.round(g.u.r)
+			if (g.bouge) {
+				this.enregistrer()
+			}
 		},
-		uhrClavier (event, mode) {
-			// Barrierefreiheit: Pfeiltasten drehen den Zeiger (Minute: 1 min, Stunde: 5 min; mit Umschalt mehr)
+		uhrClavier (event, u, mode) {
+			// Pfeiltasten drehen den Zeiger (Minute: 1 min, Stunde: 5 min; mit Umschalt mehr)
 			const pas = mode === 'minute' ? (event.shiftKey ? 5 : 1) : (event.shiftKey ? 60 : 5)
 			if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
-				this.uhr.m = (this.uhr.m + pas) % 1440
+				u.m = (u.m + pas) % 1440
 			} else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
-				this.uhr.m = (this.uhr.m - pas + 1440) % 1440
+				u.m = (u.m - pas + 1440) % 1440
 			} else {
 				return
 			}
 			event.preventDefault()
-			this.uhrSpeichern()
+			this.enregistrer()
 		}
 	}
 }

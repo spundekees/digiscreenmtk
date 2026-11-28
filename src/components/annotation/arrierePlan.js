@@ -28,10 +28,6 @@ export default {
 				this.zirkel.y += vy
 				this.geo.x += vx
 				this.geo.y += vy
-				if (this.uhr) {
-					this.uhr.x += vx
-					this.uhr.y += vy
-				}
 				if (this.items.length > 0) {
 					this.reinitialiserSelection()
 					deplacerAnnotations(this.items, vx, vy)
@@ -64,11 +60,6 @@ export default {
 			this.zirkel.r = Math.min(Math.max(this.zirkel.r * f, 10), 3000)
 			this.geo.x = pivot.x + (this.geo.x - pivot.x) * f
 			this.geo.y = pivot.y + (this.geo.y - pivot.y) * f
-			if (this.uhr) {
-				this.uhr.x = pivot.x + (this.uhr.x - pivot.x) * f
-				this.uhr.y = pivot.y + (this.uhr.y - pivot.y) * f
-				this.uhr.r = Math.min(Math.max(this.uhr.r * f, 60), 1200)
-			}
 			// Alle gezeichneten Objekte wachsen mit
 			if (this.items.length > 0) {
 				this.reinitialiserSelection()

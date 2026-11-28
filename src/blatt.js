@@ -14,7 +14,8 @@ export function blattBreite (largeur) {
 // Bezugspunkt des Musters (für Skalierung der Zeichnungen), relativ zur linken oberen Ecke von <main>
 export function pivotFond (fond, largeur, hauteur, d) {
 	if (istBlatt(fond)) {
-		const x = (largeur - blattBreite(largeur)) / 2
+		const x = Math.round((largeur - blattBreite(largeur)) / 2)
+		// Fester Punkt beim Zoomen: linker Blattrand (beim Häuschen die linke Hauswand)
 		return fond.includes('/img/lineatur-haeuschen') ? { x: x, y: d.y } : { x: x, y: hauteur / 2 + d.y }
 	}
 	return { x: largeur / 2 + d.x, y: hauteur / 2 + d.y }

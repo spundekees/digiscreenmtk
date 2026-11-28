@@ -37,6 +37,12 @@ export default function echelonnerAnnotations (items, f, px, py) {
 				const c = map(ox + item.zirkel.x * sx, oy + item.zirkel.y * sy)
 				item.zirkel = { x: c.x, y: c.y, r: item.zirkel.r * sx * f, a0: item.zirkel.a0, a1: item.zirkel.a1 }
 			}
+		} else if (item.objet === 'uhr') {
+			// Lernuhr: Mittelpunkt und Radius
+			const p = map(ox, oy)
+			item.x = p.x
+			item.y = p.y
+			item.r = Math.min(Math.max((item.r || 150) * f, 30), 1500)
 		} else if (item.objet === 'ancre') {
 			// Anfasspunkte: nur die Lage ändern, die Größe des Griffs bleibt
 			const p = map(ox, oy)

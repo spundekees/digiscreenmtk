@@ -91,35 +91,40 @@
 					<path d="M53 -4l4 4M50 3l1-3 6-6 3 3-6 6z" fill="none" stroke="#2e63ae" stroke-width="1.1" stroke-linejoin="round" />
 				</g>
 			</svg>
-			<svg id="lernuhr" v-if="uhrVisible" :width="dimensionsCanva.w" :height="dimensionsCanva.h">
-				<g :transform="'translate(' + uhr.x + ' ' + uhr.y + ')'">
-					<circle class="uhr-ziffernblatt" :r="uhr.r" @pointerdown="uhrGesteDebut($event, 'deplacer')">
+			<svg id="lernuhr" v-if="uhren.length > 0" :width="dimensionsCanva.w" :height="dimensionsCanva.h">
+				<g v-for="u in uhren" :key="u.name" :transform="'translate(' + u.x + ' ' + u.y + ')'">
+					<circle class="uhr-ziffernblatt" :r="u.r" @pointerdown="uhrGesteDebut($event, u, 'deplacer')">
 						<title>{{ $t('uhrVerschieben') }}</title>
 					</circle>
-					<path class="uhr-striche" :d="uhrDessin.striche" :stroke-width="Math.max(1, uhr.r * 0.008)" />
-					<path class="uhr-striche" :d="uhrDessin.dicke" :stroke-width="Math.max(2, uhr.r * 0.022)" />
-					<text v-for="z in uhrDessin.zahlen" :key="'z' + z.t" class="uhr-zahl" :x="z.x" :y="z.y" :font-size="uhr.r * 0.19" text-anchor="middle" dominant-baseline="central">{{ z.t }}</text>
-					<template v-if="uhr.mit24">
-						<text v-for="z in uhrDessin.rot" :key="'r' + z.t" class="uhr-zahl-rot" :x="z.x" :y="z.y" :font-size="uhr.r * 0.1" text-anchor="middle" dominant-baseline="central">{{ z.t }}</text>
+					<path class="uhr-striche" :d="uhrDessin(u.r).striche" :stroke-width="Math.max(1, u.r * 0.008)" />
+					<path class="uhr-striche" :d="uhrDessin(u.r).dicke" :stroke-width="Math.max(2, u.r * 0.022)" />
+					<text v-for="z in uhrDessin(u.r).zahlen" :key="'z' + z.t" class="uhr-zahl" :x="z.x" :y="z.y" :font-size="u.r * 0.19" text-anchor="middle" dominant-baseline="central">{{ z.t }}</text>
+					<template v-if="u.mit24">
+						<text v-for="z in uhrDessin(u.r).rot" :key="'r' + z.t" class="uhr-zahl-rot" :x="z.x" :y="z.y" :font-size="u.r * 0.1" text-anchor="middle" dominant-baseline="central">{{ z.t }}</text>
 					</template>
-					<g class="uhr-zeiger" :transform="'rotate(' + uhrWinkelStunde + ')'" role="slider" tabindex="0" :aria-label="$t('uhrStunde')" :aria-valuetext="uhrTexte" @pointerdown="uhrGesteDebut($event, 'stunde')" @keydown="uhrClavier($event, 'stunde')">
-						<line x1="0" :y1="uhr.r * 0.12" x2="0" :y2="-uhr.r * 0.5" stroke="transparent" :stroke-width="Math.max(30, uhr.r * 0.2)" stroke-linecap="round" />
-						<line class="uhr-stunde" x1="0" :y1="uhr.r * 0.1" x2="0" :y2="-uhr.r * 0.48" :stroke-width="uhr.r * 0.075" />
+					<g class="uhr-zeiger" :transform="'rotate(' + uhrWinkelStunde(u) + ')'" role="slider" tabindex="0" :aria-label="$t('uhrStunde')" :aria-valuetext="uhrTexte(u)" @pointerdown="uhrGesteDebut($event, u, 'stunde')" @keydown="uhrClavier($event, u, 'stunde')">
+						<line x1="0" :y1="u.r * 0.12" x2="0" :y2="-u.r * 0.5" stroke="transparent" :stroke-width="Math.max(30, u.r * 0.2)" stroke-linecap="round" />
+						<line class="uhr-stunde" x1="0" :y1="u.r * 0.1" x2="0" :y2="-u.r * 0.48" :stroke-width="u.r * 0.075" />
 					</g>
-					<g class="uhr-zeiger" :transform="'rotate(' + uhrWinkelMinute + ')'" role="slider" tabindex="0" :aria-label="$t('uhrMinute')" :aria-valuetext="uhrTexte" @pointerdown="uhrGesteDebut($event, 'minute')" @keydown="uhrClavier($event, 'minute')">
-						<line x1="0" :y1="uhr.r * 0.14" x2="0" :y2="-uhr.r * 0.82" stroke="transparent" :stroke-width="Math.max(26, uhr.r * 0.14)" stroke-linecap="round" />
-						<line class="uhr-minute" x1="0" :y1="uhr.r * 0.12" x2="0" :y2="-uhr.r * 0.8" :stroke-width="uhr.r * 0.04" />
+					<g class="uhr-zeiger" :transform="'rotate(' + uhrWinkelMinute(u) + ')'" role="slider" tabindex="0" :aria-label="$t('uhrMinute')" :aria-valuetext="uhrTexte(u)" @pointerdown="uhrGesteDebut($event, u, 'minute')" @keydown="uhrClavier($event, u, 'minute')">
+						<line x1="0" :y1="u.r * 0.14" x2="0" :y2="-u.r * 0.82" stroke="transparent" :stroke-width="Math.max(26, u.r * 0.14)" stroke-linecap="round" />
+						<line class="uhr-minute" x1="0" :y1="u.r * 0.12" x2="0" :y2="-u.r * 0.8" :stroke-width="u.r * 0.04" />
 					</g>
-					<circle class="uhr-mitte" :r="uhr.r * 0.055" />
-					<g class="uhr-griff" :transform="'translate(' + (uhr.r * 0.82) + ' ' + (uhr.r * 0.82) + ')'" @pointerdown="uhrGesteDebut($event, 'taille')">
+					<circle class="uhr-mitte" :r="u.r * 0.055" />
+					<g class="uhr-griff" :transform="'translate(' + (u.r * 0.82) + ' ' + (u.r * 0.82) + ')'" @pointerdown="uhrGesteDebut($event, u, 'taille')">
 						<title>{{ $t('uhrGroesse') }}</title>
 						<circle r="16" fill="#fff" stroke="#00707a" stroke-width="1.5" />
 						<path d="M-6 -6L6 6M6 6v-5M6 6h-5M-6 -6v5M-6 -6h5" stroke="#00707a" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" />
 					</g>
-					<g class="uhr-griff" :transform="'translate(0 ' + (uhr.r + 26) + ')'" role="switch" tabindex="0" :aria-checked="uhr.mit24 ? 'true' : 'false'" :aria-label="$t('uhr24')" @pointerdown.stop.prevent @click="uhrUmschalten24" @keydown.enter.prevent="uhrUmschalten24" @keydown.space.prevent="uhrUmschalten24">
+					<g class="uhr-griff uhr-schliessen" :transform="'translate(' + (u.r * 0.82) + ' ' + (-u.r * 0.82) + ')'" role="button" tabindex="0" :aria-label="$t('uhrEntfernen')" @pointerdown.stop.prevent @click="uhrEntfernen(u)" @keydown.enter.prevent="uhrEntfernen(u)" @keydown.space.prevent="uhrEntfernen(u)">
+						<title>{{ $t('uhrEntfernen') }}</title>
+						<circle r="16" fill="#fff" stroke="#d0021b" stroke-width="1.5" />
+						<path d="M-5.5 -5.5L5.5 5.5M5.5 -5.5L-5.5 5.5" stroke="#d0021b" stroke-width="2.2" stroke-linecap="round" />
+					</g>
+					<g class="uhr-griff" :transform="'translate(0 ' + (u.r + 26) + ')'" role="switch" tabindex="0" :aria-checked="u.mit24 ? 'true' : 'false'" :aria-label="$t('uhr24')" @pointerdown.stop.prevent @click="uhrUmschalten24(u)" @keydown.enter.prevent="uhrUmschalten24(u)" @keydown.space.prevent="uhrUmschalten24(u)">
 						<title>{{ $t('uhr24') }}</title>
-						<rect x="-34" y="-14" width="68" height="28" rx="14" :fill="uhr.mit24 ? '#ffe5e5' : '#fff'" stroke="#d0021b" stroke-width="1.5" />
-						<text x="0" y="1" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#d0021b" :text-decoration="uhr.mit24 ? '' : 'line-through'">13–0</text>
+						<rect x="-34" y="-14" width="68" height="28" rx="14" :fill="u.mit24 ? '#ffe5e5' : '#fff'" stroke="#d0021b" stroke-width="1.5" />
+						<text x="0" y="1" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#d0021b" :text-decoration="u.mit24 ? '' : 'line-through'">13–0</text>
 					</g>
 				</g>
 			</svg>
@@ -160,7 +165,7 @@
 			<button type="button" id="outil-dienes" class="outil" :title="$t('dienes')" :aria-label="$t('dienes')" :aria-pressed="materielMenu === 'dienes' ? 'true' : 'false'" :class="{'actif': materielMenu === 'dienes'}" @click="basculerMateriel('dienes')">
 				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><g stroke="#7a5320" stroke-width="1.2" stroke-linejoin="round"><path d="M2 9h12l3-3H5z" fill="#f9e6c1" /><path d="M14 9l3-3v12l-3 3z" fill="#ddb36d" /><rect x="2" y="9" width="12" height="12" fill="#f3d49a" /><path d="M5 9v12M8 9v12M11 9v12M2 12h12M2 15h12M2 18h12" fill="none" stroke-width="0.6" /><path d="M19 4h3v17h-3z" fill="#f3d49a" /><path d="M19 7.4h3M19 10.8h3M19 14.2h3M19 17.6h3" stroke-width="0.6" /></g></svg>
 			</button>
-			<button type="button" id="outil-uhr" class="outil" :title="$t('lernuhr')" :aria-label="$t('lernuhr')" :aria-pressed="uhrVisible ? 'true' : 'false'" :class="{'actif': uhrVisible}" @click="basculerUhr">
+			<button type="button" id="outil-uhr" class="outil" :title="$t('lernuhr')" :aria-label="$t('lernuhr')" @click="uhrHinzufuegen">
 				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#fff" stroke="#000" stroke-width="1.8" /><path d="M12 3.5v1.6M20.5 12h-1.6M12 20.5v-1.6M3.5 12h1.6" stroke="#000" stroke-width="1.4" /><path d="M12 12V7" stroke="#1f5fbf" stroke-width="2.4" stroke-linecap="round" /><path d="M12 12l4.6 2.6" stroke="#000" stroke-width="1.6" stroke-linecap="round" /><circle cx="12" cy="12" r="1.4" fill="#d0021b" /></svg>
 			</button>
 			<button type="button" class="outil" :title="$t('deplacerPanneaux')" :aria-label="$t('deplacerPanneaux')" :aria-pressed="(outilDeplacer) ? 'true' : 'false'" :class="{'actif': outilDeplacer}" @click="definirOutilPrincipal('deplacer')">

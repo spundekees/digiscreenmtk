@@ -612,7 +612,7 @@ export default {
 			const e = this.echelleFond
 			// Höhe der Musterkachel in px (Originalgröße)
 			// Muss der tatsächlichen Bildhöhe entsprechen (SVG: height-Attribut), sonst wachsen Zeichnungen nicht passend mit
-			const hauteurs = { 'lineatur-haeuschen.svg': 180, 'lineatur-haeuschen-gross.svg': 288, 'seyes.png': 80, 'quadrillage-grand.png': 60, 'quadrillage-gris-grand.png': 60 }
+			const hauteurs = { 'partition.png': 150, 'lineatur-haeuschen.svg': 180, 'lineatur-haeuschen-gross.svg': 288, 'seyes.png': 80, 'quadrillage-grand.png': 60, 'quadrillage-gris-grand.png': 60 }
 			const nom = this.fond.split('/').pop()
 			const taille = 'auto ' + ((hauteurs[nom] || 30) * e) + 'px'
 			const d = this.decalageFond
@@ -620,15 +620,27 @@ export default {
 			if (this.fond.substring(0, 1) === '#') {
 				return { 'background-color': this.fond }
 			} else if (istBlatt(this.fond)) {
-				// Blatt mit fester Breite: Rand links und rechts, Muster beginnt am linken Blattrand, nur senkrecht verschiebbar
-				const b = blattBreite(this.largeur || window.innerWidth)
-				const l = 'calc(50% - ' + (b / 2) + 'px)'
-				const r = 'calc(50% + ' + (b / 2) + 'px)'
-				const rand = 'linear-gradient(to right, #dde3e5 0, #dde3e5 calc(50% - ' + (b / 2 + 1) + 'px), #b9c4c8 calc(50% - ' + (b / 2 + 1) + 'px), #b9c4c8 ' + l + ', transparent ' + l + ', transparent ' + r + ', #b9c4c8 ' + r + ', #b9c4c8 calc(50% + ' + (b / 2 + 1) + 'px), #dde3e5 calc(50% + ' + (b / 2 + 1) + 'px), #dde3e5 100%)'
+				// Blatt mit fester Breite: Rand links und rechts, Muster beginnt am linken Blattrand, nur senkrecht verschiebbar.
+				// Hinweis: Prozentwerte in background-position beziehen sich auf (Fläche − Bild), daher hier feste Pixelwerte.
+				const largeur = this.largeur || window.innerWidth
+				const b = blattBreite(largeur)
+				const gauche = Math.round((largeur - b) / 2)
+				const droite = gauche + b
+				const rand = 'linear-gradient(to right, #dde3e5 0, #dde3e5 ' + (gauche - 1) + 'px, #b9c4c8 ' + (gauche - 1) + 'px, #b9c4c8 ' + gauche + 'px, transparent ' + gauche + 'px, transparent ' + droite + 'px, #b9c4c8 ' + droite + 'px, #b9c4c8 ' + (droite + 1) + 'px, #dde3e5 ' + (droite + 1) + 'px, #dde3e5 100%)'
 				const y = this.fond.includes('/img/lineatur-haeuschen') ? d.y + 'px' : 'calc(50% + ' + d.y + 'px)'
-				return { 'background-color': '#ffffff', 'background-image': rand + ', ' + image, 'background-size': '100% 100%, ' + taille, 'background-repeat': 'no-repeat, repeat', 'background-position': '0 0, ' + l + ' ' + y }
+				if (this.fond.includes('/img/lineatur-haeuschen')) {
+					// Häuschen auch am Zeilenende: rechte Hauswand genau am rechten Blattrand
+					const h = (hauteurs[nom] || 180) * e
+					const haus = 'url(' + recupererRessource(this.fond.replace(/lineatur-haeuschen(-gross)?\.svg/, 'lineatur-haeuschen-ende.svg')) + ')'
+					const xHaus = Math.round(droite - 50 * h / 180)
+					// Linkes Haus genau am linken Blattrand (die Kachel hat links 24 Einheiten Weißraum)
+					const xKachel = Math.round(gauche - 24 * h / 180)
+					return { 'background-color': '#ffffff', 'background-image': rand + ', ' + haus + ', ' + image, 'background-size': '100% 100%, auto ' + h + 'px, ' + taille, 'background-repeat': 'no-repeat, repeat-y, repeat', 'background-position': '0 0, ' + xHaus + 'px ' + y + ', ' + xKachel + 'px ' + y }
+				}
+				return { 'background-color': '#ffffff', 'background-image': rand + ', ' + image, 'background-size': '100% 100%, ' + taille, 'background-repeat': 'no-repeat, repeat', 'background-position': '0 0, ' + gauche + 'px ' + y }
 			} else if (this.fond.includes('/img/partition.png')) {
-				return { 'background-image': image, 'background-size': e === 1 ? 'contain' : 'auto ' + (100 * e) + '%', 'background-repeat': 'repeat', 'background-position': centre }
+				// Notensysteme: 5 Linien im Abstand von 18 px, Systeme 150 px auseinander (Medienzentrum MTK)
+				return { 'background-color': '#ffffff', 'background-image': image, 'background-size': taille, 'background-repeat': 'repeat', 'background-position': centre }
 			} else if (this.fond.includes('/img/lineatur-haeuschen')) {
 				return { 'background-color': '#ffffff', 'background-image': image, 'background-size': taille, 'background-repeat': 'repeat', 'background-position': d.x + 'px ' + d.y + 'px' }
 			} else if (this.fond.includes('/img/seyes.png')) {
